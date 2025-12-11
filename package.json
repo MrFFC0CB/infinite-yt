@@ -4,10 +4,12 @@
   "description": "",
   "main": "build/main.js",
   "scripts": {
-	 "build": "node esbuild.config.js",
+    "clean-build-dir": "rmdir /s /q build 2>nul & mkdir build",
+    "clean-out-dir": "rmdir /s /q out 2>nul",
     "copy-public": "xcopy public build /E /I /Y",
-    "dev": "npm run build && npm run copy-public && electron build/main.js",
-    "package": "npm run build && npm run copy-public && electron-forge package"
+    "build": "npm run clean-build-dir && node esbuild.config.js && npm run copy-public",
+    "dev": "npm run build && electron build/main.js",
+    "package": "npm run clean-out-dir && npm run build && electron-forge package"
   },
   "author": "MrFFC0CB",
   "license": "ISC",
