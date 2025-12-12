@@ -1,18 +1,5 @@
+import { port, runServer } from './express';
 const { app, BrowserWindow } = require('electron');
-const path = require('path');
-const express = require('express');
-
-const runServer = () => {
-	let port = 1312;
-	const server = express();
-
-	// server.use(express.static(path.join(__dirname, 'public')));
-	server.use(express.static('build'));
-
-	server.listen(port, () => {
-		console.log(`Server running on port ${port}`);
-	});
-};
 
 const createWindow = () => {
 	const win = new BrowserWindow({
@@ -22,8 +9,7 @@ const createWindow = () => {
 		// autoHideMenuBar: true,
 	});
 
-	// win.loadFile(path.join(__dirname, 'index.html'));
-	win.loadURL('http://localhost:1312');
+	win.loadURL(`http://localhost:${port}`);
 };
 
 app.whenReady().then(() => {
