@@ -12,8 +12,7 @@ esbuild.build({
 esbuild.build({
 	entryPoints: [
 		'src/main/main.ts',
-		'src/main/express.ts',
-		'src/main/puppeteer.ts',
+		'src/main/preload.ts'
 	],
 	bundle: true,
 	outdir: 'build',

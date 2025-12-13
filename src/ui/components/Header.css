@@ -1,0 +1,32 @@
+header {
+	width: 100%;
+	position: sticky;
+	top: 0;
+	left: 0;
+	z-index: 10;
+	background-color: rgb(69, 101, 159);
+}
+header .container {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding-top: 0.75rem;
+	padding-bottom: 0.75rem;
+}
+header .container, 
+header .container a {
+	color: var(--main-text-color);
+}
+header #logo {
+	width: 4.375rem;
+}
+header #logo img {
+	width: 100%;
+}
+header .wrapper-title {
+	flex-grow: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.8rem;
+}
