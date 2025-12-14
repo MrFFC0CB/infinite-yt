@@ -1,10 +1,16 @@
+import { NavLink, useLocation, useParams } from "react-router";
+import "./Header.css";
+
 const Header = () => {
+	const location = useLocation();
+	const params = useParams();
+
 	return (
 		<header>
 			<div className="container">
-				<button id='logo'>
+				<NavLink to="/" id="logo">
 					<img src="assets/images/logo.svg" alt="" />
-				</button>
+				</NavLink>
 
 				<div className="wrapper-title">
 				</div>

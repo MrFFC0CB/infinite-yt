@@ -1,13 +1,27 @@
-import { Link } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router";
 
-const App = () => {
+import Header from "./components/Header";
+import Home from "./components/Home";
+import Watch from "./components/Watch";
+import ListVideos from "./components/ListVideos";
+
+import './App.css';
+
+export default function App() {
 	return (
-		<>
-			<h1>Hello World!</h1>
+		<BrowserRouter>
+			<Header />
 
-			<Link to="/watching">Watching</Link>
-		</>
+			<main>
+				<Routes>
+					<Route path="/" element={<Home />} />
+					<Route path="watch/:videoId" element={<Watch />} />
+					<Route path="search/:query" element={<ListVideos />} />
+					<Route path="favorites" element={<ListVideos />} />
+
+					<Route path="*" element={<Home />} />
+				</Routes>
+			</main>
+		</BrowserRouter>
 	);
 };
-
-export default App;
