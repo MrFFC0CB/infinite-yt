@@ -5,7 +5,7 @@ import IconHeart from "./icons/IconHeart";
 import "./Home.css";
 
 export default function Home() {
-	const { favorites, setFavorites } = useFavorites();
+	const { favorites } = useFavorites();
 
 	let navigate = useNavigate();
 	const goWatch = () => {

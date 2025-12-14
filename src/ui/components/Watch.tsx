@@ -9,7 +9,7 @@ export default function Watch() {
 	const videoId = useParams().videoId as string || '';
 
 	const onPlayerReady = (event: any) => {
-		console.log('%cPlayer ready!', 'color: #bada55; font-weight: bold;');
+		// console.log('%cPlayer ready!', 'color: #bada55; font-weight: bold;');
 		event.target.playVideo();
 	};
 

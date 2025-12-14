@@ -7,7 +7,7 @@ module.exports = {
 	 overwrite: true,
 	 platform: 'win32',
 	 name: 'Infinite YT',
-	 icon: './assets/images/favicon.ico',
+	 icon: './public/assets/images/favicon.ico',
   },
   rebuildConfig: {},
   makers: [
@@ -16,8 +16,7 @@ module.exports = {
       config: {},
     }, */
     /* {
-      name: '@electron-forge/maker-zip',
-      platforms: ['win32']
+      name: '@electron-forge/maker-zip'
     }, */
   ],
   plugins: [

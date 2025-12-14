@@ -1,4 +1,4 @@
-import { NavLink, useLocation, useParams } from "react-router";
+import { NavLink, useLocation } from "react-router";
 import { useFavorites } from "../hooks/useFavorites";
 import IconHeart from "./icons/IconHeart";
 import "./Header.css";
