@@ -4,21 +4,56 @@ import { port, runServer } from './express';
 
 const { app, BrowserWindow, ipcMain } = require('electron');
 
-let favorites: Array<string> = [];
-try {
-	fs.readFileSync(path.join(__dirname, 'playlists/favorites.json'));
-	favorites = JSON.parse(fs.readFileSync(path.join(__dirname, 'playlists/favorites.json')).toString());
-} catch (error) {
-	console.log('Favorites file not found.');
+let favorites: Favorite[] = [];
+const userDataDir = path.join(process.cwd(), 'data');
+const pathToFavs = path.join(userDataDir, 'favorites.json');
+
+fs.mkdirSync(userDataDir, { recursive: true });
+if (!fs.existsSync(pathToFavs)) {
+	fs.writeFileSync(pathToFavs, "[]");
 }
-const getFavorites = () => {
+
+/* console.log('__dirname: ', path.join(__dirname, 'data'));
+console.log('process.cwd(): ', path.join(process.cwd(), 'data')); */
+
+const readFavorites = () => {
+	try {
+		favorites = JSON.parse(fs.readFileSync(pathToFavs).toString());
+	} catch (error) {
+		console.error('Favorites file not found.');
+	}
 	return favorites;
 };
-const addFavorite = (videoId: string) => {
-	favorites.push(videoId);
+const writeFavorites = (favorites: Favorite[]): Favorite[] | string => {
+	try {
+		fs.writeFileSync(pathToFavs, JSON.stringify(favorites));
+		favorites = readFavorites();
+	} catch (error) {
+		console.error('Favorites file not found.');
+		return `ERROR READING FAVORITES: ${error}`;
+	}
+	return favorites;
 };
-const removeFavorite = (videoId: string) => {
-	favorites = favorites.filter((video) => video !== videoId);
+
+const getFavorites = () => {
+	favorites = readFavorites();
+
+	return favorites;
+};
+const addFavorite = (_e: any, videoData: Favorite) => {
+	favorites = readFavorites();
+	favorites.push({
+		videoId: videoData.videoId,
+		videoTitle: '',
+	});
+	
+	return writeFavorites(favorites);
+};
+const removeFavorite = (_e: any, videoData: Favorite) => {
+	favorites = readFavorites();
+	favorites = favorites.filter((video) => video.videoId !== videoData.videoId);
+
+	return writeFavorites(favorites);
 };
 
 const createWindow = () => {

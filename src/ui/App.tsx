@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router";
 
 import Header from "./components/Header";
+import AppLayout from "./routes/AppLayout";
 import Home from "./components/Home";
 import Watch from "./components/Watch";
 import ListVideos from "./components/ListVideos";
@@ -12,16 +13,16 @@ export default function App() {
 		<BrowserRouter>
 			<Header />
 
-			<main>
-				<Routes>
+			<Routes>
+				<Route element={<AppLayout />}>
 					<Route path="/" element={<Home />} />
 					<Route path="watch/:videoId" element={<Watch />} />
 					<Route path="search/:query" element={<ListVideos />} />
 					<Route path="favorites" element={<ListVideos />} />
 
 					<Route path="*" element={<Home />} />
-				</Routes>
-			</main>
+				</Route>
+			</Routes>
 		</BrowserRouter>
 	);
 };

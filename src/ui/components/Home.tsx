@@ -1,48 +1,53 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useFavorites } from "../hooks/useFavorites";
+import IconHeart from "./icons/IconHeart";
 
 import "./Home.css";
 
-interface Window {
-	api: {
-		getFavorites: () => Promise<any[]>;
-		addFavorite: (videoId: string) => Promise<any[]>;
-		removeFavorite: (videoId: string) => Promise<any[]>;
-	}
-}
-
-declare const window: Window;
-
 export default function Home() {
-	const [favorites, setFavorites] = useState<any[]>([]);
-
-	useEffect(() => {
-		window.api.getFavorites().then((favs: any) => {
-			setFavorites(favs);
-		});
-	}, []);
+	const { favorites, setFavorites } = useFavorites();
 
 	let navigate = useNavigate();
 	const goWatch = () => {
-		const videoId = document.getElementById('video-id') as HTMLInputElement;
-		(videoId.value) ? navigate(`/watch/${videoId.value}`) : navigate(`/watch/aDaOgu2CQtI`);
+		let videoId = (document.querySelector('input#video-id') as HTMLInputElement).value as string;
+		if (videoId.length > 11) {
+			if (videoId.includes('https://youtu.be/')) videoId = videoId.replace('https://youtu.be/', '');
+			if (videoId.includes('?v=')) videoId = videoId.split('?v=')[1].split('&')[0];
+		}
+
+		(videoId) ? navigate(`/watch/${videoId}`) : navigate(`/watch/aDaOgu2CQtI`);
 	};
 	const goSearch = () => {
-		const keyword = document.getElementById('keyword') as HTMLInputElement;
+		const keyword = document.querySelector('input#keyword') as HTMLInputElement;
 		(keyword.value) ? navigate(`/search/${keyword.value}`) : navigate(`/search/Pearl Jam`);
 	};
 
 	return(
 		<div className="container">
-			<input type="text" name="video-id" id="video-id" placeholder="Video URL" />
-			<button onClick={goWatch}>Watch</button>
-			<input type="text" name="keyword" id="keyword" placeholder="Keyword, like 'Pearl Jam'" />
-			<button onClick={goSearch}>Search</button>
+			<div id="main-options">
+				<div className="form-group">
+					<span>Paste video URL</span>
+					<input type="text" name="video-id" id="video-id" placeholder="https://youtu.be/aDaOgu2CQtI" onKeyDown={(e) => e.key === 'Enter' && goWatch()} />
+					<span>to</span>
+					<button onClick={goWatch}>Watch</button>
+				</div>
+				<div className="form-group">
+					<span>Type something like</span>
+					<input type="text" name="keyword" id="keyword" placeholder="Pearl Jam" onKeyDown={(e) => e.key === 'Enter' && goSearch()} />
+					<span>to</span>
+					<button onClick={goSearch}>Search</button>
+				</div>
+			</div>
 
 			{favorites.length > 0 &&
-				<div className="favorites-options">
-					<button onClick={() => navigate(`/watch/${favorites[0]}`)}>Watch favorites</button>
-					<button onClick={() => navigate(`/favorites`)}>List favorites</button>
+				<div id="favorites-options">
+					<Link to={`/watch/${favorites[0].videoId}`}>
+						Watch <IconHeart /> videos
+					</Link>
+
+					<Link to={`/favorites`}>
+						List <IconHeart /> videos
+					</Link>
 				</div>
 			}
 		</div>

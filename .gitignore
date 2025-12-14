@@ -2,7 +2,7 @@
 node_modules/
 build/
 out/
-public/playlists/*
+data/
 
 _*.txt
 _*.md

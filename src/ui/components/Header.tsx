@@ -1,9 +1,21 @@
 import { NavLink, useLocation, useParams } from "react-router";
+import { useFavorites } from "../hooks/useFavorites";
+import IconHeart from "./icons/IconHeart";
 import "./Header.css";
 
 const Header = () => {
-	const location = useLocation();
-	const params = useParams();
+	const pathname = useLocation().pathname;
+	const { favorites, setFavorites } = useFavorites();
+
+	const handleAddToFavorites = (e: any) => {
+		if (pathname.split('/')[1] != 'watch') return;
+
+		window.api.addFavorite({ videoId: pathname.split('/')[2], videoTitle: '' })
+			.then((favs) => {
+				e.target.classList.add('active');
+				setFavorites(favs);
+			});
+	};
 
 	return (
 		<header>
@@ -13,6 +25,16 @@ const Header = () => {
 				</NavLink>
 
 				<div className="wrapper-title">
+					{pathname === '/' && <span>Home</span>}
+
+					{pathname.split('/')[1] === 'watch' &&
+						<>
+							<span>Video Title Example</span>
+							<button onClick={handleAddToFavorites}>
+								<IconHeart fill="#bf0101" />
+							</button>
+						</>
+					}
 				</div>
 
 				<nav>

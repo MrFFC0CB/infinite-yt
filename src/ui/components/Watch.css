@@ -1,0 +1,12 @@
+main#watch {
+	display: flex;
+}
+
+#wrapper-player {
+	flex: 1;
+}
+#wrapper-player iframe {
+	width: 100%;
+	height: 100%;
+	display: block;
+}

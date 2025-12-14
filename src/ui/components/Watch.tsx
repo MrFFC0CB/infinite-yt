@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useParams } from "react-router";
 
-declare const YT: any;
+import './Watch.css';
 
 export default function Watch() {
 	const wrapperPlayerRef = useRef<HTMLDivElement | null>(null);
