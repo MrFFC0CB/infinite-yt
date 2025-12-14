@@ -3,7 +3,7 @@ import Header from "./components/Header";
 
 export default function AppLayout() {
 	const pathname = useLocation().pathname;
-	let currentSection: string = '';
+	let currentSection: HeaderProps['currentSection'] = 'home';
 
 	if (pathname === '/') {
 		currentSection = 'home';
@@ -13,7 +13,7 @@ export default function AppLayout() {
 
 	return (
 		<>
-			<Header />
+			<Header currentSection={currentSection} />
 
 			<main id={currentSection}>
 				<Outlet />

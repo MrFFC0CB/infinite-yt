@@ -15,4 +15,10 @@ declare global {
 		videoId: string;
 		videoTitle: string;
 	}
+
+	type Section = 'home' | 'watch' | 'search' | 'favorites' | string
+
+	type HeaderProps = {
+		currentSection: Section
+	}
 }

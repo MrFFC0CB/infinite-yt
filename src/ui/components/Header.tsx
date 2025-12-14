@@ -1,19 +1,17 @@
-import { NavLink, useLocation, useParams } from "react-router";
+import { NavLink, useParams } from "react-router";
 import { useFavorites } from "../hooks/useFavorites";
 import IconHeart from "./icons/IconHeart";
 import "./Header.css";
 
-const Header = () => {
-	const pathname = useLocation().pathname;
+const Header = ({ currentSection }: HeaderProps) => {
 	const params = useParams();
 	const { favorites, setFavorites } = useFavorites();
 
-	console.log(`params on Header: ${JSON.stringify(params)}`);
-
 	const handleAddToFavorites = (e: any) => {
-		if (pathname.split('/')[1] != 'watch') return;
+		if (currentSection != 'watch') return;
+		if (!params.videoId) return;
 
-		window.api.addFavorite({ videoId: pathname.split('/')[2], videoTitle: '' })
+		window.api.addFavorite({ videoId: params.videoId, videoTitle: '' })
 			.then((favs) => {
 				e.target.classList.add('active');
 				setFavorites(favs);
@@ -28,15 +26,23 @@ const Header = () => {
 				</NavLink>
 
 				<div className="wrapper-title">
-					{pathname === '/' && <span>Home</span>}
+					{currentSection === 'home' && <span>Home</span>}
 
-					{pathname.split('/')[1] === 'watch' &&
+					{currentSection === 'watch' &&
 						<>
 							<span>Video Title Example</span>
 							<button onClick={handleAddToFavorites}>
 								<IconHeart fill="#bf0101" />
 							</button>
 						</>
+					}
+
+					{currentSection === 'search' &&
+						<span>Searching</span>
+					}
+
+					{currentSection === 'favorites' &&
+						<span>Favorites</span>
 					}
 				</div>
 
