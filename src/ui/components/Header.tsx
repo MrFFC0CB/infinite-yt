@@ -1,11 +1,14 @@
-import { NavLink, useLocation } from "react-router";
+import { NavLink, useLocation, useParams } from "react-router";
 import { useFavorites } from "../hooks/useFavorites";
 import IconHeart from "./icons/IconHeart";
 import "./Header.css";
 
 const Header = () => {
 	const pathname = useLocation().pathname;
+	const params = useParams();
 	const { favorites, setFavorites } = useFavorites();
+
+	console.log(`params on Header: ${JSON.stringify(params)}`);
 
 	const handleAddToFavorites = (e: any) => {
 		if (pathname.split('/')[1] != 'watch') return;

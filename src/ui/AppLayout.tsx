@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from "react-router";
+import Header from "./components/Header";
 
 export default function AppLayout() {
 	const pathname = useLocation().pathname;
@@ -11,8 +12,12 @@ export default function AppLayout() {
 	}
 
 	return (
-		<main id={currentSection}>
-			<Outlet />
-		</main>
+		<>
+			<Header />
+
+			<main id={currentSection}>
+				<Outlet />
+			</main>
+		</>
 	);
 }
