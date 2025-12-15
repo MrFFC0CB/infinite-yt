@@ -17,7 +17,7 @@ body {
 	background-image: linear-gradient(to right bottom, rgb(9, 10, 37), rgb(37, 49, 115), rgb(17, 4, 28));
 }
 
-#root {
+#app {
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;

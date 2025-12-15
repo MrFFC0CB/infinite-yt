@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router";
 
 import AppLayout from "./AppLayout";
 import Home from "./components/Home";
@@ -7,19 +7,54 @@ import ListVideos from "./components/ListVideos";
 
 import './App.css';
 
-export default function App() {
-	return (
-		<BrowserRouter>
-			<Routes>
-				<Route element={<AppLayout />}>
-					<Route path="/" element={<Home />} />
-					<Route path="watch/:videoId" element={<Watch />} />
-					<Route path="search/:query" element={<ListVideos />} />
-					<Route path="favorites" element={<ListVideos />} />
+const router = createBrowserRouter([
+	{
+		Component: AppLayout,
+		children: [
+			{
+				index: true,
+				Component: Home,
+				handle: {
+					section: 'home',
+					title: 'Home',
+				} satisfies RouteHandle
+			},
+			{
+				path: 'watch/:videoId',
+				Component: Watch,
+				handle: {
+					section: 'watch',
+					title: 'Watch',
+				} satisfies RouteHandle
+			},
+			{
+				path: "search/:query",
+				Component: ListVideos,
+				handle: {
+					section: 'search',
+					title: 'Search',
+				} satisfies RouteHandle
+			},
+			{
+				path: "favorites",
+				Component: ListVideos,
+				handle: {
+					section: 'favorites',
+					title: 'Favorites',
+				} satisfies RouteHandle
+			},
+			/* {
+				path: "*",
+				Component: Home,
+				handle: {
+					section: 'home',
+					title: 'Home',
+				} satisfies RouteHandle
+			} */
+		]
+	}
+]);
 
-					<Route path="*" element={<Home />} />
-				</Route>
-			</Routes>
-		</BrowserRouter>
-	);
+export default function App() {
+	return <RouterProvider router={router} />;
 };

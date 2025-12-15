@@ -1,23 +1,28 @@
-import { Outlet, useLocation } from "react-router";
+import { useEffect, useState } from "react";
+import { Outlet, useMatches } from "react-router";
 import Header from "./components/Header";
 
 export default function AppLayout() {
-	const pathname = useLocation().pathname;
-	let currentSection: HeaderProps['currentSection'] = 'home';
+	const matches = useMatches();
+	const routeHandle = matches.map(m => m.handle as RouteHandle | undefined).find(Boolean);
 
-	if (pathname === '/') {
-		currentSection = 'home';
-	} else {
-		currentSection = pathname.split('/')[1];
-	}
+	const sectionTitle = routeHandle?.title ?? 'Home';
+	const currentSection = routeHandle?.section ?? 'home';
+
+	const [ title, setTitle ] = useState<string>(sectionTitle);
+	const [ currentVideo, setCurrentVideo ] = useState<VideoDataType>({ videoId: '', videoTitle: '' });
+
+	useEffect(() => {
+		setTitle(sectionTitle);
+	}, [sectionTitle]);
 
 	return (
-		<>
-			<Header currentSection={currentSection} />
+		<div id="app" className={currentSection}>
+			<Header title={title} currentSection={currentSection} currentVideo={currentVideo} />
 
-			<main id={currentSection}>
-				<Outlet />
+			<main>
+				<Outlet context={{ setTitle, currentVideo, setCurrentVideo }} />
 			</main>
-		</>
+		</div>
 	);
 }

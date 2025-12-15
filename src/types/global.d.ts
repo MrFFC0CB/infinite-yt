@@ -5,20 +5,27 @@ declare global {
 
 	interface Window {
 		api: {
-			getFavorites: () => Promise<Favorite[]>;
-			addFavorite: (videoData: Favorite) => Promise<Favorite[]>;
-			removeFavorite: (videoData: Favorite) => Promise<Favorite[]>;
+			getFavorites: () => Promise<VideoDataType[]>;
+			addFavorite: (videoData: VideoDataType) => Promise<VideoDataType[]>;
+			removeFavorite: (videoData: VideoDataType) => Promise<VideoDataType[]>;
 		};
-	}
+	};
 
-	interface Favorite {
+	type RouteHandle = {
+		section: Section;
+		title?: string;
+	};
+
+	interface VideoDataType {
 		videoId: string;
 		videoTitle: string;
-	}
+	};
 
-	type Section = 'home' | 'watch' | 'search' | 'favorites' | string
+	type Section = 'home' | 'watch' | 'search' | 'favorites';
 
 	type HeaderProps = {
-		currentSection: Section
-	}
+		title: string;
+		currentSection: Section;
+		currentVideo?: VideoDataType;
+	};
 }

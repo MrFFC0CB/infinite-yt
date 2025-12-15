@@ -30,3 +30,6 @@ header .wrapper-title {
 	justify-content: center;
 	gap: 0.8rem;
 }
+#app:not(.watch) header .wrapper-title span {
+	text-transform: capitalize;
+}

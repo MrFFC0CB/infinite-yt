@@ -4,7 +4,7 @@ import { port, runServer } from './express';
 
 const { app, BrowserWindow, ipcMain } = require('electron');
 
-let favorites: Favorite[] = [];
+let favorites: VideoDataType[] = [];
 const userDataDir = path.join(process.cwd(), 'data');
 const pathToFavs = path.join(userDataDir, 'favorites.json');
 
@@ -24,7 +24,7 @@ const readFavorites = () => {
 	}
 	return favorites;
 };
-const writeFavorites = (favorites: Favorite[]): Favorite[] | string => {
+const writeFavorites = (favorites: VideoDataType[]): VideoDataType[] | string => {
 	try {
 		fs.writeFileSync(pathToFavs, JSON.stringify(favorites));
 		favorites = readFavorites();
@@ -40,7 +40,7 @@ const getFavorites = () => {
 
 	return favorites;
 };
-const addFavorite = (_e: any, videoData: Favorite) => {
+const addFavorite = (_e: any, videoData: VideoDataType) => {
 	favorites = readFavorites();
 	favorites.push({
 		videoId: videoData.videoId,
@@ -49,7 +49,7 @@ const addFavorite = (_e: any, videoData: Favorite) => {
 	
 	return writeFavorites(favorites);
 };
-const removeFavorite = (_e: any, videoData: Favorite) => {
+const removeFavorite = (_e: any, videoData: VideoDataType) => {
 	favorites = readFavorites();
 	favorites = favorites.filter((video) => video.videoId !== videoData.videoId);
 

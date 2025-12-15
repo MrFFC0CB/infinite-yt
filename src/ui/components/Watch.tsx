@@ -1,16 +1,23 @@
+type LayoutContext = {
+	setTitle: React.Dispatch<React.SetStateAction<string>>;
+};
+
 import { useEffect, useRef } from "react";
-import { useParams } from "react-router";
+import { useOutletContext, useParams } from "react-router";
 
 import './Watch.css';
 
 export default function Watch() {
+	const { setTitle } = useOutletContext<LayoutContext>();
 	const wrapperPlayerRef = useRef<HTMLDivElement | null>(null);
 	const ytPlayerRef = useRef<any>(null);
 	const videoId = useParams().videoId as string || '';
 
 	const onPlayerReady = (event: any) => {
-		// console.log('%cPlayer ready!', 'color: #bada55; font-weight: bold;');
+		console.log('%cPlayer ready!', 'color: #bada55; font-weight: bold;');
 		event.target.playVideo();
+		
+		setTitle(event.target.getVideoData().title || '');
 	};
 
 	useEffect(() => {
