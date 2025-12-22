@@ -1,9 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router";
 
 import AppLayout from "./AppLayout";
-import Home from "./components/Home";
-import Watch from "./components/Watch";
-import ListVideos from "./components/ListVideos";
+import Home from "./pages/Home";
+import Watch from "./pages/Watch";
+import SearchResults from "./pages/SearchResults";
+import FavoritesPage from "./pages/FavoritesPage";
 
 import './App.css';
 
@@ -20,7 +21,15 @@ const router = createBrowserRouter([
 				} satisfies RouteHandle
 			},
 			{
-				path: 'watch/:videoId',
+				path: 'watch/video/:videoId',
+				Component: Watch,
+				handle: {
+					section: 'watch',
+					title: 'Watch',
+				} satisfies RouteHandle
+			},
+			{
+				path: 'watch/favorites/:videoId',
 				Component: Watch,
 				handle: {
 					section: 'watch',
@@ -29,7 +38,7 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "search/:query",
-				Component: ListVideos,
+				Component: SearchResults,
 				handle: {
 					section: 'search',
 					title: 'Search',
@@ -37,7 +46,7 @@ const router = createBrowserRouter([
 			},
 			{
 				path: "favorites",
-				Component: ListVideos,
+				Component: FavoritesPage,
 				handle: {
 					section: 'favorites',
 					title: 'Favorites',

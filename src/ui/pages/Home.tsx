@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router";
 import { useFavorites } from "../hooks/useFavorites";
-import IconHeart from "./icons/IconHeart";
+import IconHeart from "../components/icons/IconHeart";
 
 import "./Home.css";
 
@@ -15,7 +15,7 @@ export default function Home() {
 			if (videoId.includes('?v=')) videoId = videoId.split('?v=')[1].split('&')[0];
 		}
 
-		(videoId) ? navigate(`/watch/${videoId}`) : navigate(`/watch/aDaOgu2CQtI`);
+		(videoId) ? navigate(`/watch/video/${videoId}`) : navigate(`/watch/video/aDaOgu2CQtI`);
 	};
 	const goSearch = () => {
 		const keyword = document.querySelector('input#keyword') as HTMLInputElement;
@@ -41,7 +41,7 @@ export default function Home() {
 
 			{favorites.length > 0 &&
 				<div id="favorites-options">
-					<Link to={`/watch/${favorites[0].videoId}`}>
+					<Link to={`/watch/favorites/${favorites[0].videoId}`}>
 						Watch <IconHeart fill="#bf0101" /> videos
 					</Link>
 

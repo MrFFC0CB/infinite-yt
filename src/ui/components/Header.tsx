@@ -2,7 +2,7 @@ import { NavLink } from "react-router";
 import FavButton from "./FavButton";
 import "./Header.css";
 
-const Header = ({ title, currentSection }: HeaderProps) => {
+export default function Header({ title, currentSection }: HeaderProps) {
 	return (
 		<header>
 			<div className="container">
@@ -14,9 +14,7 @@ const Header = ({ title, currentSection }: HeaderProps) => {
 					<span>{title}</span>
 
 					{currentSection === 'watch' &&
-						<>
-							<FavButton />
-						</>
+						<FavButton />
 					}
 				</div>
 
@@ -26,5 +24,3 @@ const Header = ({ title, currentSection }: HeaderProps) => {
 		</header>
 	)
 };
-
-export default Header;

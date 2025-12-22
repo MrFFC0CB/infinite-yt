@@ -3,15 +3,14 @@ type LayoutContext = {
 };
 
 import { useEffect, useRef } from "react";
-import { useOutletContext, useParams } from "react-router";
+import { useOutletContext } from "react-router";
 
-import './Watch.css';
+import './Player.css';
 
-export default function Watch() {
+export default function Player({ videoId }: { videoId: string }) {
 	const { setTitle } = useOutletContext<LayoutContext>();
 	const wrapperPlayerRef = useRef<HTMLDivElement | null>(null);
 	const ytPlayerRef = useRef<any>(null);
-	const videoId = useParams().videoId as string || '';
 
 	const onPlayerReady = (event: any) => {
 		console.log('%cPlayer ready!', 'color: #bada55; font-weight: bold;');

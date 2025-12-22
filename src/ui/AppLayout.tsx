@@ -21,7 +21,7 @@ export default function AppLayout() {
 			<Header title={title} currentSection={currentSection} currentVideo={currentVideo} />
 
 			<main>
-				<Outlet context={{ setTitle, currentVideo, setCurrentVideo }} />
+				<Outlet context={{ currentSection, setTitle, currentVideo, setCurrentVideo }} />
 			</main>
 		</div>
 	);

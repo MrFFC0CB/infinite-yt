@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export function useFavorites() {
-	const [favorites, setFavorites] = useState<Favorite[]>([]);
+	const [favorites, setFavorites] = useState<VideoDataType[]>([]);
 
 	useEffect(() => {
 		window.api.getFavorites().then(favs => {

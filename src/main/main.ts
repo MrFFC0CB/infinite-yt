@@ -6,7 +6,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 
 let favorites: VideoDataType[] = [];
 const userDataDir = path.join(process.cwd(), 'data');
-const pathToFavs = path.join(userDataDir, 'favorites.json');
+const pathToFavs = path.join(userDataDir, 'lists/favorites.json');
 
 fs.mkdirSync(userDataDir, { recursive: true });
 if (!fs.existsSync(pathToFavs)) {
