@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { port, runServer } from './express';
+import { app, BrowserWindow, ipcMain } from 'electron';
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+import { fetchRelateds, fetchSearchResults } from './puppeteer';
 
 let favorites: VideoDataType[] = [];
 const userDataDir = path.join(process.cwd(), 'data');
@@ -72,8 +73,12 @@ const createWindow = () => {
 
 app.whenReady().then(() => {
 	runServer();
+	createWindow();
+
 	ipcMain.handle('favorites:get', getFavorites);
 	ipcMain.handle('favorites:add', addFavorite);
 	ipcMain.handle('favorites:remove', removeFavorite);
-	createWindow();
+
+	ipcMain.handle('relateds:get', (_e, videoId: string) => fetchRelateds(videoId));
+	ipcMain.handle('search:get', (_e, keyword: string) => fetchSearchResults(keyword));
 });

@@ -16,36 +16,72 @@ export default function Watch() {
 	const videoIdParam: string = useParams().videoId || '';
 	const isVideo = useMatch('/watch/video/:videoId');
 	const isFavorites = useMatch('/watch/favorites/:videoId');
-	// const [ playlist, setPlaylist ] = useState<Playlist>({ items: [], currentIndex: 0, mode: 'loop' });
-	const [playlist, setPlaylist] = useState<Playlist | null>(null);
-	// const [ currentVideo, setCurrentVideo ] = useState<VideoDataType>({ videoId: '', videoTitle: '' });
+	const [ playlist, setPlaylist ] = useState<Playlist | null>(null);
 
 	useEffect(() => {
 		if (!videoIdParam) return;
+		if (!isFavorites || favorites.length === 0) return;
 
-		if (isFavorites && favorites.length > 0) {
-			const index = Math.max(favorites.findIndex(v => v.videoId === videoIdParam), 0);
+		const index = Math.max(favorites.findIndex(v => v.videoId === videoIdParam), 0);
 
-			setPlaylist({
-				items: favorites,
-				currentIndex: index,
-				mode: 'loop'
-			});
-		}
+		setPlaylist({
+			items: favorites,
+			currentIndex: index,
+			mode: 'loop'
+		});
+	}, [videoIdParam, isFavorites, favorites]);
 
-		if (isVideo) {
-			const relateds: VideoDataType[] = [{
-				videoId: videoIdParam,
-				videoTitle: ''
-			}];
-			const index = Math.max(relateds.findIndex(v => v.videoId === videoIdParam), 0);
+	useEffect(() => {
+		if (!videoIdParam) return;
+		if (!isVideo) return;
+
+		const relateds: VideoDataType[] = [{
+			videoId: videoIdParam,
+			videoTitle: ''
+		}];
+		setPlaylist({
+			items: relateds,
+			currentIndex: 0,
+			mode: 'infinite-search'
+		});
+
+		window.api.fetchRelateds(videoIdParam).then(results => {
+			relateds.push(...results);
+
 			setPlaylist({
 				items: relateds,
-				currentIndex: index,
+				currentIndex: 0,
 				mode: 'infinite-search'
 			});
-		}
-	}, [videoIdParam, isFavorites, isVideo, favorites]);
+			// console.log(`fetch relateds results: ${JSON.stringify(results)}`);
+		});
+	}, [videoIdParam, isVideo]);
+	
+	const handleVideoEnded = () => {
+		if (!playlist) return;
+
+		setPlaylist(prev => {
+			if (!prev) return prev;
+
+			let nextIndex = prev.currentIndex + 1;
+
+			if (nextIndex >= prev.items.length) {
+				if (prev.mode === 'loop') {
+					nextIndex = 0;
+				} else if (prev.mode === 'infinite-search') {
+					/* 
+					 * TODO: implement infinite search
+					 */
+					nextIndex = prev.currentIndex;
+				}
+			}
+
+			return {
+				...prev,
+				currentIndex: nextIndex
+			};
+		});
+	};
 
 	const currentVideoId = useMemo(() => {
 		if (!playlist) return '';
@@ -57,6 +93,24 @@ export default function Watch() {
 		return <div>Loading...</div>;
 	}
 	return (
-		<Player videoId={currentVideoId} />
+		<>
+			{playlist && 
+				<div id="wrapper-playlist">
+					<div id="playlist-controls">
+						<button onClick={() => setPlaylist({ ...playlist, currentIndex: Math.max(playlist.currentIndex - 1, 0) })}>Prev</button>
+						<button onClick={() => setPlaylist({ ...playlist, currentIndex: Math.min(playlist.currentIndex + 1, playlist.items.length - 1) })}>Next</button>
+					</div>
+					<div id="playlist">
+						{playlist.items.map((v, i) => (
+							<div key={v.videoId} className={`playlist-item ${i === playlist.currentIndex ? 'active' : ''}`} onClick={() => setPlaylist({ ...playlist, currentIndex: i })}>
+								<img src={`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`} alt={v.videoTitle} />
+								<p className="video-title">{v.videoTitle}</p>
+							</div>
+						))}
+					</div>
+				</div>
+			}
+			<Player videoId={currentVideoId} onEnded={handleVideoEnded} />
+		</>
 	);
 };

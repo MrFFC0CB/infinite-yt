@@ -1,3 +1,61 @@
 #app.watch main {
 	display: flex;
+	position: relative;
+}
+
+
+#wrapper-playlist {
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 1;
+	overflow: hidden;
+	background-color: #000;
+}
+#wrapper-playlist #playlist {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
+	scrollbar-color: var(--main-text-color) rgb(69, 101, 159);
+}
+#wrapper-playlist #playlist .playlist-item {
+	width: 8rem;
+	position: relative;
+	aspect-ratio: 1/1;
+	flex-shrink: 0;
+	cursor: pointer;
+	border: 1px solid #ebebeb;
+	overflow: hidden;
+	background-position: center;
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+#wrapper-playlist #playlist .playlist-item.active {
+	border-color: #bada55;
+}
+#wrapper-playlist #playlist .playlist-item img {
+	max-width: 100%;
+	display: block;
+	opacity: 0.8;
+	transition: all 0.3s ease;
+}
+#wrapper-playlist #playlist .playlist-item:hover img,
+#wrapper-playlist #playlist .playlist-item.active img {
+	opacity: 1;
+}
+#wrapper-playlist #playlist .playlist-item .video-title {
+	width: 100%;
+	padding: 6px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	color: #ebebeb;
+	opacity: 1;
+	background-color: #2d2d2d99;
+	transition: all 0.3s ease;
 }

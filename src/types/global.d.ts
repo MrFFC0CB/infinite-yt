@@ -8,6 +8,8 @@ declare global {
 			getFavorites: () => Promise<VideoDataType[]>;
 			addFavorite: (videoData: VideoDataType) => Promise<VideoDataType[]>;
 			removeFavorite: (videoData: VideoDataType) => Promise<VideoDataType[]>;
+			fetchSearchResults: (searchString: string) => Promise<VideoDataType[]>;
+			fetchRelateds: (videoId: string) => Promise<VideoDataType[]>;
 		};
 	};
 
