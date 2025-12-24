@@ -45,14 +45,14 @@ const addFavorite = (_e: any, videoData: VideoDataType) => {
 	favorites = readFavorites();
 	favorites.push({
 		videoId: videoData.videoId,
-		videoTitle: '',
+		videoTitle: videoData.videoTitle,
 	});
 	
 	return writeFavorites(favorites);
 };
-const removeFavorite = (_e: any, videoData: VideoDataType) => {
+const removeFavorite = (_e: any, videoId: string) => {
 	favorites = readFavorites();
-	favorites = favorites.filter((video) => video.videoId !== videoData.videoId);
+	favorites = favorites.filter((video) => video.videoId !== videoId);
 
 	return writeFavorites(favorites);
 };

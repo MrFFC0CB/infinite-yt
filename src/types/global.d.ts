@@ -7,7 +7,7 @@ declare global {
 		api: {
 			getFavorites: () => Promise<VideoDataType[]>;
 			addFavorite: (videoData: VideoDataType) => Promise<VideoDataType[]>;
-			removeFavorite: (videoData: VideoDataType) => Promise<VideoDataType[]>;
+			removeFavorite: (videoId: string) => Promise<VideoDataType[]>;
 			fetchSearchResults: (searchString: string) => Promise<VideoDataType[]>;
 			fetchRelateds: (videoId: string) => Promise<VideoDataType[]>;
 		};
@@ -28,6 +28,6 @@ declare global {
 	type HeaderProps = {
 		title: string;
 		currentSection: Section;
-		currentVideo?: VideoDataType;
+		activeVideoId?: string;
 	};
 }

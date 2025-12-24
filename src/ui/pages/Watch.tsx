@@ -6,7 +6,7 @@ type Playlist = {
 };
 
 import { useEffect, useMemo, useState } from "react";
-import { useMatch, useParams } from "react-router";
+import { useMatch, useOutletContext, useParams } from "react-router";
 import { useFavorites } from "../hooks/useFavorites";
 import Player from "../components/Player";
 import './Watch.css';
@@ -17,6 +17,39 @@ export default function Watch() {
 	const isVideo = useMatch('/watch/video/:videoId');
 	const isFavorites = useMatch('/watch/favorites/:videoId');
 	const [ playlist, setPlaylist ] = useState<Playlist | null>(null);
+	const { setActiveVideoId } = useOutletContext<{ setActiveVideoId: (id: string) => void }>();
+
+	const currentVideoId = useMemo(() => {
+		if (!playlist) return '';
+
+		return playlist.items[playlist.currentIndex].videoId;
+	}, [playlist]);
+
+	const handleVideoEnded = () => {
+		if (!playlist) return;
+
+		setPlaylist(prev => {
+			if (!prev) return prev;
+
+			let nextIndex = prev.currentIndex + 1;
+
+			if (nextIndex >= prev.items.length) {
+				if (prev.mode === 'loop') {
+					nextIndex = 0;
+				} else if (prev.mode === 'infinite-search') {
+					/* 
+					 * TODO: implement infinite search
+					 */
+					nextIndex = prev.currentIndex;
+				}
+			}
+
+			return {
+				...prev,
+				currentIndex: nextIndex
+			};
+		});
+	};
 
 	useEffect(() => {
 		if (!videoIdParam) return;
@@ -56,38 +89,10 @@ export default function Watch() {
 			// console.log(`fetch relateds results: ${JSON.stringify(results)}`);
 		});
 	}, [videoIdParam, isVideo]);
-	
-	const handleVideoEnded = () => {
-		if (!playlist) return;
 
-		setPlaylist(prev => {
-			if (!prev) return prev;
-
-			let nextIndex = prev.currentIndex + 1;
-
-			if (nextIndex >= prev.items.length) {
-				if (prev.mode === 'loop') {
-					nextIndex = 0;
-				} else if (prev.mode === 'infinite-search') {
-					/* 
-					 * TODO: implement infinite search
-					 */
-					nextIndex = prev.currentIndex;
-				}
-			}
-
-			return {
-				...prev,
-				currentIndex: nextIndex
-			};
-		});
-	};
-
-	const currentVideoId = useMemo(() => {
-		if (!playlist) return '';
-
-		return playlist.items[playlist.currentIndex].videoId;
-	}, [playlist]);
+	useEffect(() => {
+		if (currentVideoId) setActiveVideoId(currentVideoId);
+	}, [currentVideoId]);
 
 	if (!playlist || !currentVideoId) {
 		return <div>Loading...</div>;

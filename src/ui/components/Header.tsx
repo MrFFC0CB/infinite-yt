@@ -2,7 +2,7 @@ import { NavLink } from "react-router";
 import FavButton from "./FavButton";
 import "./Header.css";
 
-export default function Header({ title, currentSection }: HeaderProps) {
+export default function Header({ title, currentSection, activeVideoId }: HeaderProps) {
 	return (
 		<header>
 			<div className="container">
@@ -14,7 +14,7 @@ export default function Header({ title, currentSection }: HeaderProps) {
 					<span>{title}</span>
 
 					{currentSection === 'watch' &&
-						<FavButton />
+						<FavButton videoTitle={title} videoId={activeVideoId} />
 					}
 				</div>
 

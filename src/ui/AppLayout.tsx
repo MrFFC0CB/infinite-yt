@@ -10,6 +10,7 @@ export default function AppLayout() {
 	const currentSection = routeHandle?.section ?? 'home';
 
 	const [ title, setTitle ] = useState<string>(sectionTitle);
+	const [ activeVideoId, setActiveVideoId ] = useState<string>('');
 
 	useEffect(() => {
 		setTitle(sectionTitle);
@@ -17,10 +18,10 @@ export default function AppLayout() {
 
 	return (
 		<div id="app" className={currentSection}>
-			<Header title={title} currentSection={currentSection} />
+			<Header title={title} currentSection={currentSection} activeVideoId={activeVideoId} />
 
 			<main>
-				<Outlet context={{ currentSection, setTitle }} />
+				<Outlet context={{ currentSection, setTitle, setActiveVideoId }} />
 			</main>
 		</div>
 	);
