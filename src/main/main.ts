@@ -7,9 +7,10 @@ import { fetchRelateds, fetchSearchResults } from './puppeteer';
 
 let favorites: VideoDataType[] = [];
 const userDataDir = path.join(process.cwd(), 'data');
-const pathToFavs = path.join(userDataDir, 'lists/favorites.json');
+const listsDir = path.join(userDataDir, 'lists');
+const pathToFavs = path.join(listsDir, 'favorites.json');
 
-fs.mkdirSync(userDataDir, { recursive: true });
+fs.mkdirSync(listsDir, { recursive: true });
 if (!fs.existsSync(pathToFavs)) {
 	fs.writeFileSync(pathToFavs, "[]");
 }
