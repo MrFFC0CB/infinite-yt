@@ -23,6 +23,9 @@ export default function Watch() {
 	const playlistRef = useRef<Playlist | null>(null);
 	const { setActiveVideoId } = useOutletContext<{ setActiveVideoId: (id: string) => void }>();
 	const { setTitle } = useOutletContext<LayoutContext>();
+	const wrapperPlayerRef = useRef<HTMLDivElement | null>(null);
+	const ytPlayerRef = useRef<any>(null);
+	const isPlayerReadyRef = useRef<boolean>(false);
 
 	const currentVideoId = useMemo(() => {
 		if (!playlist) return '';
@@ -33,9 +36,6 @@ export default function Watch() {
 
 	const getRelateds = () => {
 		const id: string = playlistRef.current?.items[playlistRef.current?.currentIndex].videoId || videoIdParam;
-
-		console.log('id: ', id);
-
 		if (!id) return;
 
 		window.api.fetchRelateds(id).then(results => {
@@ -56,6 +56,10 @@ export default function Watch() {
 	};
 
 	const handlePlayerReady = (title: string) => {
+		isPlayerReadyRef.current = true;
+		ytPlayerRef.current.playVideo();
+
+		setTitle(title);
 		if (!playlistRef.current && !isVideo) return;
 
 		setPlaylist(prev => {
@@ -90,6 +94,9 @@ export default function Watch() {
 	};
 
 	const handlePlayerCued = () => {
+		setTitle(ytPlayerRef.current.getVideoData().title);
+		ytPlayerRef.current.playVideo();
+
 		const pl = playlistRef.current;
 		if (!pl) return;
 
@@ -98,17 +105,8 @@ export default function Watch() {
 		}
 	};
 
-	/* Player */
-	const wrapperPlayerRef = useRef<HTMLDivElement | null>(null);
-	const ytPlayerRef = useRef<any>(null);
-	const isPlayerReadyRef = useRef<boolean>(false);
-
 	const onPlayerReady = (event: any) => {
 		// console.log('%cPlayer ready!', 'color: #bada55; font-weight: bold;');
-		isPlayerReadyRef.current = true;
-		event.target.playVideo();
-
-		setTitle(event.target.getVideoData().title || '');
 		handlePlayerReady(event.target.getVideoData().title || '');
 	};
 	const onPlayerStateChange = (event: any) => {
@@ -122,9 +120,7 @@ export default function Watch() {
 		}
 
 		if (event.data == YT.PlayerState.CUED) {
-			console.log('%cPlayer cued!', 'color: #54d9eb; font-weight: bold;');
-			setTitle(ytPlayerRef.current.getVideoData().title);
-			ytPlayerRef.current.playVideo();
+			// console.log('%cPlayer cued!', 'color: #54d9eb; font-weight: bold;');
 			handlePlayerCued();
 		}
 	};
@@ -158,14 +154,6 @@ export default function Watch() {
 			}
 		};
 	}, []);
-
-	useEffect(() => {
-		if (!ytPlayerRef.current) return;
-		if (!isPlayerReadyRef.current) return;
-
-		ytPlayerRef.current.cueVideoById(currentVideoId);
-	}, [currentVideoId]);
-	/* end Player */
 
 	useEffect(() => {
 		playlistRef.current = playlist;
@@ -202,7 +190,14 @@ export default function Watch() {
 	}, [videoIdParam, isVideo]);
 
 	useEffect(() => {
-		if (currentVideoId) setActiveVideoId(currentVideoId);
+		if (currentVideoId) {
+			setActiveVideoId(currentVideoId);
+
+			if (!ytPlayerRef.current) return;
+			if (!isPlayerReadyRef.current) return;
+
+			ytPlayerRef.current.cueVideoById(currentVideoId);
+		}
 	}, [currentVideoId]);
 
 	return (

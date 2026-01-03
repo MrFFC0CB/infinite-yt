@@ -112,15 +112,7 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 				// const linkText = e.textContent.trim();
 				const linkText = e.innerText.trim();
 
-				if (
-					e?.closest<HTMLElement>('.ytmusic-section-list-renderer')?.textContent?.toLocaleLowerCase().includes('other performances')
-					|| 
-					linkText.toLowerCase().includes('enganchado rock') 
-					|| 
-					linkText.toLowerCase().includes('enganchado retro')
-					|| 
-					linkText.toLowerCase().includes('cuarteto enganchado')
-				) {
+				if (e?.closest<HTMLElement>('.ytmusic-section-list-renderer')?.textContent?.toLocaleLowerCase().includes('other performances')) {
 					// console.log(`%cskipping%c: ${linkText}`, 'font-weight: bold', 'font-weight: normal');
 					return null;
 				}
