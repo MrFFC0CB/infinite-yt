@@ -5,8 +5,6 @@ import "./FavButton.css";
 export default function FavButton({ videoId = '', videoTitle = '' }: { videoId?: string, videoTitle?: string }) {
 	const { favorites, setFavorites } = useFavorites();
 
-	console.log(`videoTitle: ${videoTitle}`);
-
 	if (!videoId) return null;
 
 	const isFav = favorites.some(f => f.videoId === videoId);

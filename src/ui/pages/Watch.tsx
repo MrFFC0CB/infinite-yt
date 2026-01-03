@@ -19,11 +19,60 @@ export default function Watch() {
 	const [ playlist, setPlaylist ] = useState<Playlist | null>(null);
 	const { setActiveVideoId } = useOutletContext<{ setActiveVideoId: (id: string) => void }>();
 
+	(globalThis as any).playlist = playlist;
+
 	const currentVideoId = useMemo(() => {
 		if (!playlist) return '';
+		if (!playlist.items[playlist.currentIndex]) return '';
+
+		console.log('playlist.currentIndex: ', playlist.currentIndex);
+		console.log('playlist: ', playlist);
 
 		return playlist.items[playlist.currentIndex].videoId;
 	}, [playlist]);
+
+	const getRelateds = () => {
+		const id = playlist?.items[playlist?.currentIndex].videoId;
+
+		console.log('id on getRelateds: ', id);
+		console.log('currentVideoId on getRelateds: ', currentVideoId);
+		console.log('playlist.items[playlist.currentIndex].videoId on getRelateds: ', playlist?.items[playlist?.currentIndex].videoId);
+
+		if (!id) return;
+
+		window.api.fetchRelateds(id).then(results => {
+			// console.log('results: ', results);
+
+			setPlaylist(prev => {
+				if (!prev) return prev;
+				
+				let resultsFiltered = results.filter(r =>
+					!prev.items.some(p => p.videoId === r.videoId)
+				);
+
+				if (resultsFiltered.length === 0) {
+					// getRelateds();
+				}
+
+				return { ...prev, items: [...prev.items, ...resultsFiltered] };
+			});
+		});
+	};
+
+	const handlePlayerReady = (title: string) => {
+		if (!playlist && !isVideo) return;
+
+		setPlaylist(prev => {
+			if (!prev) return prev;
+			
+			const updated = [...prev.items];
+			updated[prev.currentIndex] = {
+				...updated[prev.currentIndex],
+				videoTitle: title
+			};
+			return { ...prev, items: updated };
+		});
+	};
 
 	const handleVideoEnded = () => {
 		if (!playlist) return;
@@ -33,22 +82,26 @@ export default function Watch() {
 
 			let nextIndex = prev.currentIndex + 1;
 
-			if (nextIndex >= prev.items.length) {
-				if (prev.mode === 'loop') {
-					nextIndex = 0;
-				} else if (prev.mode === 'infinite-search') {
-					/* 
-					 * TODO: implement infinite search
-					 */
-					nextIndex = prev.currentIndex;
-				}
+			if (nextIndex >= prev.items.length && prev.mode === 'loop') {
+				nextIndex = 0;
 			}
+			/* if (nextIndex >= prev.items.length - 1 && prev.mode === 'infinite-search') {
+				getRelateds(prev.items[prev.items.length - 1].videoId);
+			} */
 
 			return {
 				...prev,
 				currentIndex: nextIndex
 			};
 		});
+	};
+
+	const handlePlayerCued = () => {
+		if (!playlist) return;
+
+		if (playlist.currentIndex >= playlist.items.length - 1 && playlist.mode === 'infinite-search') {
+			getRelateds();
+		}
 	};
 
 	useEffect(() => {
@@ -78,17 +131,8 @@ export default function Watch() {
 			mode: 'infinite-search'
 		});
 
-		window.api.fetchRelateds(videoIdParam).then(results => {
-			relateds.push(...results);
-
-			setPlaylist({
-				items: relateds,
-				currentIndex: 0,
-				mode: 'infinite-search'
-			});
-			// console.log(`fetch relateds results: ${JSON.stringify(results)}`);
-		});
-	}, [videoIdParam, isVideo]);
+		getRelateds();
+	}, [videoIdParam, isVideo, getRelateds]);
 
 	useEffect(() => {
 		if (currentVideoId) setActiveVideoId(currentVideoId);
@@ -115,7 +159,12 @@ export default function Watch() {
 					</div>
 				</div>
 			}
-			<Player videoId={currentVideoId} onEnded={handleVideoEnded} />
+			<Player
+				videoId={currentVideoId}
+				onEnded={handleVideoEnded}
+				onReady={handlePlayerReady}
+				onCued={handlePlayerCued}
+			/>
 		</>
 	);
 };

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { port, runServer } from './express';
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, session } from 'electron';
 
 import { fetchRelateds, fetchSearchResults } from './puppeteer';
 
@@ -9,10 +9,17 @@ let favorites: VideoDataType[] = [];
 const userDataDir = path.join(process.cwd(), 'data');
 const listsDir = path.join(userDataDir, 'lists');
 const pathToFavs = path.join(listsDir, 'favorites.json');
+const pathToCookieFile = path.join(userDataDir, 'cookies.json');
 
 fs.mkdirSync(listsDir, { recursive: true });
 if (!fs.existsSync(pathToFavs)) {
 	fs.writeFileSync(pathToFavs, "[]");
+}
+
+async function exportYoutubeCookies() {
+	const ytCookies = await session.defaultSession.cookies.get({ domain: 'youtube.com' });
+	fs.writeFileSync(pathToCookieFile, JSON.stringify(ytCookies, null, 2));
+	console.log('Exported Electron cookies to electron-cookies.json');
 }
 
 /* console.log('__dirname: ', path.join(__dirname, 'data'));
@@ -76,10 +83,22 @@ app.whenReady().then(() => {
 	runServer();
 	createWindow();
 
+	app.on('activate', () => {
+		if (BrowserWindow.getAllWindows().length === 0) createWindow();
+	});
+
 	ipcMain.handle('favorites:get', getFavorites);
 	ipcMain.handle('favorites:add', addFavorite);
 	ipcMain.handle('favorites:remove', removeFavorite);
 
 	ipcMain.handle('relateds:get', (_e, videoId: string) => fetchRelateds(videoId));
 	ipcMain.handle('search:get', (_e, keyword: string) => fetchSearchResults(keyword));
+});
+
+app.on('window-all-closed', () => {
+	if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('before-quit', () => {
+	exportYoutubeCookies();
 });

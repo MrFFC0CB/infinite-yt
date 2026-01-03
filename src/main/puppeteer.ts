@@ -1,4 +1,4 @@
-import puppeteer, { Page } from 'puppeteer';
+import puppeteer, { Page, Browser } from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
 
@@ -24,12 +24,32 @@ const blockPupResources = async (page: Page) => {
 	});
 };
 
+const loadCookies = async (browser: Browser) => {
+	let cookies;
+	try {
+		cookies = fs.readFileSync(pathToCookieFile, 'utf-8').trim();
+		if (cookies) cookies = JSON.parse(cookies);
+	} catch (error) {
+		console.log('Cookies file not found. Attempting to create it...');
+		// create empty cookies.json if doesn't exists
+		fs.writeFile(pathToCookieFile, '[]', (err) => {
+			if (err) throw err;
+		});
+	}
+
+	if (cookies) await browser.setCookie(...cookies);
+};
+
+let isPupRunning = false;
 /*
 	Timeout example:
 		await new Promise(resolve => setTimeout(resolve, 2000));
 		const navigationPromise = page.waitForNavigation({waitUntil: "domcontentloaded"});
 */
 async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
+	if (isPupRunning) return [];
+	isPupRunning = true;
+
 	const browser = await puppeteer.launch({
 		// headless: false,
 		defaultViewport: {
@@ -45,22 +65,8 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 
 		await blockPupResources(page);
 
-		const relatedsArray: VideoDataType[] = [];
+		await loadCookies(browser);
 
-		let cookies;
-		try {
-			cookies = JSON.parse(fs.readFileSync(pathToCookieFile).toString());
-		} catch (error) {
-			console.log('Cookies file not found. Attempting to create it...');
-			// create empty cookies.json if doesn't exists
-			fs.writeFile(pathToCookieFile, '', (err) => {
-				if (err) throw err;
-			});
-		}
-
-		if (cookies) await browser.setCookie(...cookies);
-
-		// await page.goto(`https://music.youtube.com/watch?v=${currentVideoId}`);
 		await page.goto(`https://music.youtube.com/watch?v=${currentVideoId}`, {
 			waitUntil: 'networkidle2'
 		});
@@ -73,6 +79,8 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 		});
 
 		await new Promise(resolve => setTimeout(resolve, 500));
+
+		const relatedsArray: VideoDataType[] = [];
 
 		const fromUpNextTab = await page.$$eval('#automix-contents img.yt-img-shadow', links => {
 			return links.map(e => {
@@ -93,49 +101,47 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 
 		relatedsArray.push(...fromUpNextTab);
 
-		// if (relatedsArray.length < 10) {
-			await page.click('#player-page #side-panel #tabsContainer #tabsContent .tab-header:last-of-type');
+		await page.click('#player-page #side-panel #tabsContainer #tabsContent .tab-header:last-of-type');
 
-			await page.waitForSelector('#player-page #items-wrapper a[href*="watch?v="]');
+		await page.waitForSelector('#player-page #items-wrapper a[href*="watch?v="]');
 
-			await new Promise(resolve => setTimeout(resolve, 1000));
+		await new Promise(resolve => setTimeout(resolve, 1000));
 
-			const fromRelatedsTab = await page.$$eval('#player-page #items-wrapper a[href*="watch?v="]', links => {
-				return links.map(e => {
-					// const linkText = e.textContent.trim();
-					const linkText = e.innerText.trim();
+		const fromRelatedsTab = await page.$$eval('#player-page #items-wrapper a[href*="watch?v="]', links => {
+			return links.map(e => {
+				// const linkText = e.textContent.trim();
+				const linkText = e.innerText.trim();
 
-					if (
-						e?.closest<HTMLElement>('.ytmusic-section-list-renderer')?.textContent?.toLocaleLowerCase().includes('other performances')
-						|| 
-						linkText.toLowerCase().includes('enganchado rock') 
-						|| 
-						linkText.toLowerCase().includes('enganchado retro')
-						|| 
-						linkText.toLowerCase().includes('cuarteto enganchado')
-					) {
-						// console.log(`%cskipping%c: ${linkText}`, 'font-weight: bold', 'font-weight: normal');
-						return null;
-					}
-					// console.log(`linkText: `, linkText);
+				if (
+					e?.closest<HTMLElement>('.ytmusic-section-list-renderer')?.textContent?.toLocaleLowerCase().includes('other performances')
+					|| 
+					linkText.toLowerCase().includes('enganchado rock') 
+					|| 
+					linkText.toLowerCase().includes('enganchado retro')
+					|| 
+					linkText.toLowerCase().includes('cuarteto enganchado')
+				) {
+					// console.log(`%cskipping%c: ${linkText}`, 'font-weight: bold', 'font-weight: normal');
+					return null;
+				}
+				// console.log(`linkText: `, linkText);
 
-					return {
-						videoId: e.href.split('watch?v=')[1].split('&')[0],
-						videoTitle: linkText
-					};
-				})
-				.filter(Boolean);
+				return {
+					videoId: e.href.split('watch?v=')[1].split('&')[0],
+					videoTitle: linkText
+				};
+			})
+			.filter(Boolean);
+		});
+
+		fromRelatedsTab.forEach((elm, index)=>{
+			relatedsArray.splice(2 * index + 1, 0, {
+				videoId: elm?.videoId || '',
+				videoTitle: elm?.videoTitle || '',
 			});
+		});
 
-			fromRelatedsTab.forEach((elm, index)=>{
-				relatedsArray.splice(2 * index + 1, 0, {
-					videoId: elm?.videoId || '',
-					videoTitle: elm?.videoTitle || '',
-				});
-			});
-		// }
-
-		console.log(`relatedsArray.length: `, relatedsArray.length);
+		// console.log(`relatedsArray.length: `, relatedsArray.length);
 
 		/* await page.goto(`https://youtube.com/watch?v=${currentVideoId}`, {
 			waitUntil: 'networkidle2'
@@ -187,11 +193,15 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 		return [];
 	} finally {
 		await browser.close();
+		isPupRunning = false;
 	}
 };
 
 
 async function fetchSearchResults(searchString: string, resultsToSkip: number = 0): Promise<VideoDataType[]> {
+	if (isPupRunning) return [];
+	isPupRunning = true;
+
 	const browser = await puppeteer.launch({
 		// headless: false,
 		/* defaultViewport: {
@@ -207,14 +217,7 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 
 		await blockPupResources(page);
 
-		let cookies;
-		try {
-			cookies = JSON.parse(fs.readFileSync(pathToCookieFile).toString());
-		} catch (error) {
-			console.log('Cookies file not found.');
-		}
-
-		if (cookies) await browser.setCookie(...cookies);
+		await loadCookies(browser);
 
 		// yt music
 		await page.goto(`https://music.youtube.com/search?q=${searchString}`, {
@@ -290,6 +293,7 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 		return [];
 	} finally {
 		await browser.close();
+		isPupRunning = false;
 	}
 };
 
