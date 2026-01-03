@@ -4,11 +4,14 @@ type Playlist = {
 	currentIndex: number;
 	mode: PlaylistMode;
 };
+type LayoutContext = {
+	setTitle: React.Dispatch<React.SetStateAction<string>>;
+};
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMatch, useOutletContext, useParams } from "react-router";
 import { useFavorites } from "../hooks/useFavorites";
-import Player from "../components/Player";
+
 import './Watch.css';
 
 export default function Watch() {
@@ -17,32 +20,25 @@ export default function Watch() {
 	const isVideo = useMatch('/watch/video/:videoId');
 	const isFavorites = useMatch('/watch/favorites/:videoId');
 	const [ playlist, setPlaylist ] = useState<Playlist | null>(null);
+	const playlistRef = useRef<Playlist | null>(null);
 	const { setActiveVideoId } = useOutletContext<{ setActiveVideoId: (id: string) => void }>();
-
-	(globalThis as any).playlist = playlist;
+	const { setTitle } = useOutletContext<LayoutContext>();
 
 	const currentVideoId = useMemo(() => {
 		if (!playlist) return '';
 		if (!playlist.items[playlist.currentIndex]) return '';
 
-		console.log('playlist.currentIndex: ', playlist.currentIndex);
-		console.log('playlist: ', playlist);
-
 		return playlist.items[playlist.currentIndex].videoId;
 	}, [playlist]);
 
 	const getRelateds = () => {
-		const id = playlist?.items[playlist?.currentIndex].videoId;
+		const id: string = playlistRef.current?.items[playlistRef.current?.currentIndex].videoId || videoIdParam;
 
-		console.log('id on getRelateds: ', id);
-		console.log('currentVideoId on getRelateds: ', currentVideoId);
-		console.log('playlist.items[playlist.currentIndex].videoId on getRelateds: ', playlist?.items[playlist?.currentIndex].videoId);
+		console.log('id: ', id);
 
 		if (!id) return;
 
 		window.api.fetchRelateds(id).then(results => {
-			// console.log('results: ', results);
-
 			setPlaylist(prev => {
 				if (!prev) return prev;
 				
@@ -50,9 +46,9 @@ export default function Watch() {
 					!prev.items.some(p => p.videoId === r.videoId)
 				);
 
-				if (resultsFiltered.length === 0) {
-					// getRelateds();
-				}
+				/* if (resultsFiltered.length === 0) {
+					getRelateds();
+				} */
 
 				return { ...prev, items: [...prev.items, ...resultsFiltered] };
 			});
@@ -60,7 +56,7 @@ export default function Watch() {
 	};
 
 	const handlePlayerReady = (title: string) => {
-		if (!playlist && !isVideo) return;
+		if (!playlistRef.current && !isVideo) return;
 
 		setPlaylist(prev => {
 			if (!prev) return prev;
@@ -75,7 +71,7 @@ export default function Watch() {
 	};
 
 	const handleVideoEnded = () => {
-		if (!playlist) return;
+		if (!playlistRef.current) return;
 
 		setPlaylist(prev => {
 			if (!prev) return prev;
@@ -85,9 +81,6 @@ export default function Watch() {
 			if (nextIndex >= prev.items.length && prev.mode === 'loop') {
 				nextIndex = 0;
 			}
-			/* if (nextIndex >= prev.items.length - 1 && prev.mode === 'infinite-search') {
-				getRelateds(prev.items[prev.items.length - 1].videoId);
-			} */
 
 			return {
 				...prev,
@@ -97,12 +90,86 @@ export default function Watch() {
 	};
 
 	const handlePlayerCued = () => {
-		if (!playlist) return;
+		const pl = playlistRef.current;
+		if (!pl) return;
 
-		if (playlist.currentIndex >= playlist.items.length - 1 && playlist.mode === 'infinite-search') {
+		if (pl.currentIndex >= pl.items.length - 1 && pl.mode === 'infinite-search') {
 			getRelateds();
 		}
 	};
+
+	/* Player */
+	const wrapperPlayerRef = useRef<HTMLDivElement | null>(null);
+	const ytPlayerRef = useRef<any>(null);
+	const isPlayerReadyRef = useRef<boolean>(false);
+
+	const onPlayerReady = (event: any) => {
+		// console.log('%cPlayer ready!', 'color: #bada55; font-weight: bold;');
+		isPlayerReadyRef.current = true;
+		event.target.playVideo();
+
+		setTitle(event.target.getVideoData().title || '');
+		handlePlayerReady(event.target.getVideoData().title || '');
+	};
+	const onPlayerStateChange = (event: any) => {
+		/* UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 */
+		// console.log('%cPlayer state change!', 'color: #393ce2; font-weight: bold;');
+		// console.log(`event.data: ${event.data}`);
+
+		if (event.data == YT.PlayerState.ENDED) {
+			// console.log('%cPlayer ended!', 'color: #39cee2; font-weight: bold;');
+			handleVideoEnded();
+		}
+
+		if (event.data == YT.PlayerState.CUED) {
+			console.log('%cPlayer cued!', 'color: #54d9eb; font-weight: bold;');
+			setTitle(ytPlayerRef.current.getVideoData().title);
+			ytPlayerRef.current.playVideo();
+			handlePlayerCued();
+		}
+	};
+
+	useEffect(() => {
+		if (!wrapperPlayerRef.current) return;
+		if (!YT || !YT.Player) return;
+
+		ytPlayerRef.current = new YT.Player('player', {
+			width: '640',
+			height: '390',
+			videoId: videoIdParam,
+			autoplay: 1,
+			events: {
+				'onReady': onPlayerReady,
+				'onStateChange': onPlayerStateChange,
+				// 'onError': onPlayerError
+			}
+		});
+
+		return () => {
+			if (ytPlayerRef.current) {
+				ytPlayerRef.current.destroy();
+				ytPlayerRef.current = null;
+			}
+			if (wrapperPlayerRef.current) {
+				wrapperPlayerRef.current.innerHTML = '';
+			}
+			if (isPlayerReadyRef.current) {
+				isPlayerReadyRef.current = false;
+			}
+		};
+	}, []);
+
+	useEffect(() => {
+		if (!ytPlayerRef.current) return;
+		if (!isPlayerReadyRef.current) return;
+
+		ytPlayerRef.current.cueVideoById(currentVideoId);
+	}, [currentVideoId]);
+	/* end Player */
+
+	useEffect(() => {
+		playlistRef.current = playlist;
+	}, [playlist]);
 
 	useEffect(() => {
 		if (!videoIdParam) return;
@@ -132,15 +199,12 @@ export default function Watch() {
 		});
 
 		getRelateds();
-	}, [videoIdParam, isVideo, getRelateds]);
+	}, [videoIdParam, isVideo]);
 
 	useEffect(() => {
 		if (currentVideoId) setActiveVideoId(currentVideoId);
 	}, [currentVideoId]);
 
-	if (!playlist || !currentVideoId) {
-		return <div>Loading...</div>;
-	}
 	return (
 		<>
 			{playlist && 
@@ -159,12 +223,9 @@ export default function Watch() {
 					</div>
 				</div>
 			}
-			<Player
-				videoId={currentVideoId}
-				onEnded={handleVideoEnded}
-				onReady={handlePlayerReady}
-				onCued={handlePlayerCued}
-			/>
+			<div id="wrapper-player" ref={wrapperPlayerRef}>
+				<div id="player"></div>
+			</div>
 		</>
 	);
 };

@@ -59,3 +59,12 @@
 	background-color: #2d2d2d99;
 	transition: all 0.3s ease;
 }
+
+#wrapper-player {
+	flex: 1;
+}
+#wrapper-player iframe {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
