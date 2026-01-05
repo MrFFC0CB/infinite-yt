@@ -13,17 +13,22 @@ declare global {
 		};
 	};
 
+	type Section = 'home' | 'watch' | 'search' | 'favorites';
+
 	type RouteHandle = {
 		section: Section;
 		title?: string;
+	};
+
+	type LayoutContext = {
+		currentSection: Section;
+		setTitle: React.Dispatch<React.SetStateAction<string>>;
 	};
 
 	interface VideoDataType {
 		videoId: string;
 		videoTitle: string;
 	};
-
-	type Section = 'home' | 'watch' | 'search' | 'favorites';
 
 	type HeaderProps = {
 		title: string;

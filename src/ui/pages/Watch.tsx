@@ -4,9 +4,6 @@ type Playlist = {
 	currentIndex: number;
 	mode: PlaylistMode;
 };
-type LayoutContext = {
-	setTitle: React.Dispatch<React.SetStateAction<string>>;
-};
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMatch, useOutletContext, useParams } from "react-router";

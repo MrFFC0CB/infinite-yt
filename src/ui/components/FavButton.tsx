@@ -18,8 +18,6 @@ export default function FavButton({ videoId = '', videoTitle = '' }: { videoId?:
 					setFavorites(favs);
 				});
 		} else {
-			console.log(`videoTitle**: ${videoTitle}`);
-
 			window.api.addFavorite({ videoId: videoId, videoTitle: videoTitle })
 				.then((favs) => {
 					setFavorites(favs);
