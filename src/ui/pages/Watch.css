@@ -3,6 +3,28 @@
 	position: relative;
 }
 
+#playlist-controls {
+	padding: 0.75rem 0.5rem 0.9rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2.5rem;
+}
+#playlist-controls button.prev {
+	transform: rotate(180deg);
+}
+#playlist-controls button svg {
+	display: block;
+}
+#playlist-controls button svg * {
+	transition: all 0.3s ease;
+}
+#playlist-controls button:hover svg circle {
+	stroke: #45659f;
+}
+#playlist-controls button:hover svg polygon, #playlist-controls button:hover svg line {
+	stroke: var(--main-text-color);
+}
 
 #wrapper-playlist {
 	width: 100%;
@@ -20,7 +42,6 @@
 	gap: 1.25rem;
 	overflow-x: auto;
 	overflow-y: hidden;
-	scrollbar-width: thin;
 	scrollbar-color: var(--main-text-color) rgb(69, 101, 159);
 }
 #wrapper-playlist #playlist .playlist-item {
@@ -34,12 +55,16 @@
 	background-position: center;
 	background-size: cover;
 	background-repeat: no-repeat;
+	transition: all 0.3s ease;
 }
 #wrapper-playlist #playlist .playlist-item.active {
-	border-color: #bada55;
+	border-color: #45659f;
+	box-shadow: inset 0 0 6px 2px #45659f;
 }
 #wrapper-playlist #playlist .playlist-item img {
 	max-width: 100%;
+	position: relative;
+	z-index: -1;
 	display: block;
 	opacity: 0.8;
 	transition: all 0.3s ease;

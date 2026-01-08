@@ -8,6 +8,7 @@ type Playlist = {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMatch, useOutletContext, useParams } from "react-router";
 import { useFavorites } from "../hooks/useFavorites";
+import IconNext from "../components/icons/IconNext";
 
 import './Watch.css';
 
@@ -100,6 +101,8 @@ export default function Watch() {
 		if (pl.currentIndex >= pl.items.length - 1 && pl.mode === 'infinite-search') {
 			getRelateds();
 		}
+
+		document.querySelector('#playlist .playlist-item.active')?.scrollIntoView();
 	};
 
 	const onPlayerReady = (event: any) => {
@@ -127,8 +130,8 @@ export default function Watch() {
 		if (!YT || !YT.Player) return;
 
 		ytPlayerRef.current = new YT.Player('player', {
-			width: '640',
-			height: '390',
+			width: '1024',
+			height: '768',
 			videoId: videoIdParam,
 			autoplay: 1,
 			events: {
@@ -201,13 +204,20 @@ export default function Watch() {
 		<>
 			{playlist && 
 				<div id="wrapper-playlist">
-					<div id="playlist-controls">
-						<button onClick={() => setPlaylist({ ...playlist, currentIndex: Math.max(playlist.currentIndex - 1, 0) })}>Prev</button>
-						<button onClick={() => setPlaylist({ ...playlist, currentIndex: Math.min(playlist.currentIndex + 1, playlist.items.length - 1) })}>Next</button>
-					</div>
+					{playlist.items.length > 1 && <div id="playlist-controls">
+						<button className="prev" onClick={() => setPlaylist({ ...playlist, currentIndex: Math.max(playlist.currentIndex - 1, 0) })}>
+							<IconNext />
+						</button>
+						<button className="next" onClick={() => setPlaylist({ ...playlist, currentIndex: Math.min(playlist.currentIndex + 1, playlist.items.length - 1) })}>
+							<IconNext />
+						</button>
+					</div>}
 					<div id="playlist">
 						{playlist.items.map((v, i) => (
-							<div key={v.videoId} className={`playlist-item ${i === playlist.currentIndex ? 'active' : ''}`} onClick={() => setPlaylist({ ...playlist, currentIndex: i })}>
+							<div key={v.videoId} className={[
+								'playlist-item',
+								i === playlist.currentIndex && 'active'
+							].filter(Boolean).join(' ')} onClick={() => setPlaylist({ ...playlist, currentIndex: i })}>
 								<img src={`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`} alt={v.videoTitle} />
 								<p className="video-title">{v.videoTitle}</p>
 							</div>

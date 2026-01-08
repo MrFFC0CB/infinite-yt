@@ -1,0 +1,5 @@
+export default function IconLoading({ color = '#45659F' }) {
+	return (
+		<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="120px" height="52px" viewBox="0 0 120 52" enable-background="new 0 0 120 52"><path fill="none" stroke={color} stroke-width="5" stroke-linecap="round" stroke-miterlimit="10" stroke-dasharray="120 260" d="M23.968,10.66 c0,0-23.526,9.304-17.943,26.472c3.85,9.493,18.225,13.118,29.667,9c9.167-3.084,30.917-15.334,34.417-17.5 c0.717-0.444,2.375-1.28,4.627-2.311c8.723-3.989,26.354-10.862,32.748-8.982c8.045,2.365,10.25,21.125,1.75,29.375 S83.688,37.919,77.461,29.63c-6.227-8.291-7.723-24.588-27.349-25.213"><animate attributeName="stroke-dashoffset" from="0" to="380" dur="2s" repeatCount="indefinite"/><animate attributeName="stroke-width" values="4;5;4" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.6;1;0.6" dur="1.2s" repeatCount="indefinite"/></path></svg>
+	);
+};

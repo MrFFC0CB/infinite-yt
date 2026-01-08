@@ -1,14 +1,13 @@
+import { useEffect, useState } from "react";
 import { useOutletContext, useParams } from "react-router";
 import ListVideos from "../components/ListVideos";
-import { useEffect, useState } from "react";
+import IconLoading from "../components/icons/IconLoading";
 
 export default function SearchResults() {
 	const keyword: string = useParams().query || '';
 	const [ loading, setLoading ] = useState<boolean>(false);
 	const [ searchResults, setSearchResults ] = useState<VideoDataType[]>([]);
 	const { setTitle } = useOutletContext<LayoutContext>();
-
-	// setTitle(`Searching for: ${keyword}`);
 
 	useEffect(() => {
 		if (!keyword) return;
@@ -28,7 +27,13 @@ export default function SearchResults() {
 	if (loading) {
 		return (
 			<div style={{position: "absolute", inset: "0", display: "grid", placeItems: "center"}}>
-				<p style={{textAlign: "center"}}>Searching for: {keyword}.<br/>Please wait.</p>
+				<p style={{fontSize: "1.5rem", textAlign: "center", lineHeight: "1.2"}}>
+					Searching for:
+					<br/>
+					<strong style={{color: "#b88be1"}}>{keyword}</strong>
+					<br/><br/>
+					<IconLoading />
+				</p>
 			</div>
 		)
 	}
