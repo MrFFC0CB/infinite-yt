@@ -52,12 +52,14 @@
 	flex-shrink: 0;
 	cursor: pointer;
 	border: 1px solid #ebebeb;
-	border-top-right-radius: 10px;
 	overflow: hidden;
 	background-position: center;
 	background-size: cover;
 	background-repeat: no-repeat;
 	transition: all 0.3s ease;
+}
+#wrapper-playlist #playlist .playlist-item:hover {
+	border-top-right-radius: 10px;
 }
 #wrapper-playlist #playlist .playlist-item.active {
 	border-color: #45659f;
@@ -86,10 +88,13 @@
 	border-radius: 100%;
 	border: 2px solid #fff;
 	background-color: #000;
-	opacity: 0.8;
-	transition: opacity 0.3s ease;
+	opacity: 0;
+	transition: all 0.3s ease;
 }
-#wrapper-playlist #playlist .playlist-item button.remove:hover {
+#wrapper-playlist #playlist .playlist-item:hover button.remove {
+	opacity: 0.8;
+}
+#wrapper-playlist #playlist .playlist-item:hover button.remove:hover {
 	opacity: 1;
 }
 #wrapper-playlist #playlist .playlist-item button.remove svg {
