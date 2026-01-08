@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMatch, useOutletContext, useParams } from "react-router";
 import { useFavorites } from "../hooks/useFavorites";
 import IconNext from "../components/icons/IconNext";
+import IconRemove from "../components/icons/IconRemove";
 
 import './Watch.css';
 
@@ -50,6 +51,16 @@ export default function Watch() {
 
 				return { ...prev, items: [...prev.items, ...resultsFiltered] };
 			});
+		});
+	};
+
+	const removeVideoFromPlaylist = (id: string) => {
+		setPlaylist(prev => {
+			if (!prev) return prev;
+			return {
+				...prev,
+				items: prev.items.filter(p => p.videoId !== id)
+			};
 		});
 	};
 
@@ -215,9 +226,17 @@ export default function Watch() {
 					<div id="playlist">
 						{playlist.items.map((v, i) => (
 							<div key={v.videoId} className={[
-								'playlist-item',
-								i === playlist.currentIndex && 'active'
-							].filter(Boolean).join(' ')} onClick={() => setPlaylist({ ...playlist, currentIndex: i })}>
+									'playlist-item',
+									i === playlist.currentIndex && 'active'
+								].filter(Boolean).join(' ')} onClick={() => setPlaylist({ ...playlist, currentIndex: i })}
+							>
+								<button className="remove" onClick={(e) => {
+										e.stopPropagation();
+										removeVideoFromPlaylist(v.videoId);
+									}}
+								>
+									<IconRemove />
+								</button>
 								<img src={`https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`} alt={v.videoTitle} />
 								<p className="video-title">{v.videoTitle}</p>
 							</div>
