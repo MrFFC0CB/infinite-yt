@@ -71,7 +71,7 @@ const createWindow = () => {
 		width: 1024,
 		height: 768,
 		icon: path.join(__dirname, 'assets/images/favicon.ico'),
-		autoHideMenuBar: !isProd,
+		autoHideMenuBar: isProd,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js'),
 		}
