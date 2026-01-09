@@ -1,6 +1,4 @@
-export let port = 3040;
-
-export const runServer = () => {
+export const runServer = (port: number) => {
 	const express = require('express');
 	const server = express();
 

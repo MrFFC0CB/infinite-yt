@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { port, runServer } from './express';
+import { runServer } from './express';
+import { fetchRelateds, fetchSearchResults } from './puppeteer';
 import { app, BrowserWindow, ipcMain, session } from 'electron';
 
-import { fetchRelateds, fetchSearchResults } from './puppeteer';
-
+const isProd = app.isPackaged;
+const PORT = isProd ? 4545 : 3040;
 let favorites: VideoDataType[] = [];
 const userDataDir = path.join(process.cwd(), 'data');
 const listsDir = path.join(userDataDir, 'lists');
@@ -70,17 +71,17 @@ const createWindow = () => {
 		width: 1024,
 		height: 768,
 		icon: path.join(__dirname, 'assets/images/favicon.ico'),
-		// autoHideMenuBar: true,
+		autoHideMenuBar: !isProd,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.js'),
 		}
 	});
 
-	win.loadURL(`http://localhost:${port}`);
+	win.loadURL(`http://localhost:${PORT}`);
 };
 
 app.whenReady().then(() => {
-	runServer();
+	runServer(PORT);
 	createWindow();
 
 	app.on('activate', () => {
