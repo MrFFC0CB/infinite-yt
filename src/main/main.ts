@@ -20,11 +20,7 @@ if (!fs.existsSync(pathToFavs)) {
 async function exportYoutubeCookies() {
 	const ytCookies = await session.defaultSession.cookies.get({ domain: 'youtube.com' });
 	fs.writeFileSync(pathToCookieFile, JSON.stringify(ytCookies, null, 2));
-	console.log('Exported Electron cookies to electron-cookies.json');
 }
-
-/* console.log('__dirname: ', path.join(__dirname, 'data'));
-console.log('process.cwd(): ', path.join(process.cwd(), 'data')); */
 
 const readFavorites = () => {
 	try {
