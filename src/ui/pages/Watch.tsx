@@ -57,9 +57,17 @@ export default function Watch() {
 	const removeVideoFromPlaylist = (id: string) => {
 		setPlaylist(prev => {
 			if (!prev) return prev;
+			const newItems = prev.items.filter(p => p.videoId !== id);
+			let newIndex = newItems.findIndex(p => p.videoId === currentVideoId);
+			
+			if (newIndex < 0) newIndex = prev.currentIndex;
+
+			console.log(`newIndex: ${newIndex}`);
+
 			return {
 				...prev,
-				items: prev.items.filter(p => p.videoId !== id)
+				items: newItems,
+				currentIndex: newIndex
 			};
 		});
 	};
