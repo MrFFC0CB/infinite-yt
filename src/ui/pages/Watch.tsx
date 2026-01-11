@@ -38,10 +38,27 @@ export default function Watch() {
 		if (!id) return;
 
 		window.api.fetchRelateds(id).then(results => {
+			if (results.length === 0) {
+				const titleToSearch = playlistRef.current?.items[playlistRef.current?.currentIndex].videoTitle;
+				if (!titleToSearch) return [];
+
+				window.api.fetchSearchResults(titleToSearch).then(res => {
+					setPlaylist(prev => {
+						if (!prev) return prev;
+						
+						const resultsFiltered = res.filter(r =>
+							!prev.items.some(p => p.videoId === r.videoId)
+						);
+
+						return { ...prev, items: [...prev.items, ...resultsFiltered] };
+					});
+				});
+			}
+
 			setPlaylist(prev => {
 				if (!prev) return prev;
 				
-				let resultsFiltered = results.filter(r =>
+				const resultsFiltered = results.filter(r =>
 					!prev.items.some(p => p.videoId === r.videoId)
 				);
 

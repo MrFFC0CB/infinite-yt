@@ -101,41 +101,47 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 
 		relatedsArray.push(...fromUpNextTab);
 
-		await page.click('#player-page #side-panel #tabsContainer #tabsContent .tab-header:last-of-type');
-
-		await page.waitForSelector('#player-page #items-wrapper a[href*="watch?v="]');
-		await new Promise(resolve => setTimeout(resolve, 1000));
-
-		const fromRelatedsTab = await page.$$eval('#player-page #items-wrapper a[href*="watch?v="]', links => {
-			return links.map(e => {
-				const linkText = e.innerText.trim();
-
-				if (e?.closest<HTMLElement>('.ytmusic-section-list-renderer')?.textContent?.toLocaleLowerCase().includes('other performances')) {
-					return null;
-				}
-
-				return {
-					videoId: e.href.split('watch?v=')[1].split('&')[0],
-					videoTitle: linkText
-				};
-			})
-			.filter(Boolean);
+		const hasRelateds = await page.evaluate(() => {
+			return !document.querySelector('#player-page #side-panel #tabsContainer #tabsContent .tab-header:last-of-type')?.hasAttribute('disabled');
 		});
 
-		fromRelatedsTab.forEach((elm, index)=>{
-			relatedsArray.splice(2 * index + 1, 0, {
-				videoId: elm?.videoId || '',
-				videoTitle: elm?.videoTitle || '',
+		if (hasRelateds) {
+			await page.click('#player-page #side-panel #tabsContainer #tabsContent .tab-header:last-of-type');
+	
+			await page.waitForSelector('#player-page #items-wrapper a[href*="watch?v="]');
+			await new Promise(resolve => setTimeout(resolve, 1000));
+	
+			const fromRelatedsTab = await page.$$eval('#player-page #items-wrapper a[href*="watch?v="]', links => {
+				return links.map(e => {
+					const linkText = e.innerText.trim();
+	
+					if (e?.closest<HTMLElement>('.ytmusic-section-list-renderer')?.textContent?.toLocaleLowerCase().includes('other performances')) {
+						return null;
+					}
+	
+					return {
+						videoId: e.href.split('watch?v=')[1].split('&')[0],
+						videoTitle: linkText
+					};
+				})
+				.filter(Boolean);
 			});
-		});
+	
+			fromRelatedsTab.forEach((elm, index)=>{
+				relatedsArray.splice(2 * index + 1, 0, {
+					videoId: elm?.videoId || '',
+					videoTitle: elm?.videoTitle || '',
+				});
+			});
+		}
 
 		// YT normal
 		/* const currentVideoTitle = await page.$eval('.middle-controls .content-info-wrapper .title', (e) => (e as HTMLElement).innerText.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
 
 		if (
-			currentVideoTitle.includes('full') && currentVideoTitle.includes('album')
+			currentVideoTitle.includes('full') || currentVideoTitle.includes('album')
 			||
-			currentVideoTitle.includes('disco') && currentVideoTitle.includes('completo')
+			currentVideoTitle.includes('disco') || currentVideoTitle.includes('completo')
 		) {
 			await page.goto(`https://www.youtube.com/watch?v=${currentVideoId}`, {
 				waitUntil: 'networkidle2'
@@ -215,9 +221,9 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 
 		const searchStringNormalized = searchString.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 		if (
-			searchStringNormalized.includes('full') && searchStringNormalized.includes('album')
+			searchStringNormalized.includes('full') || searchStringNormalized.includes('completo')
 			||
-			searchStringNormalized.includes('disco') && searchStringNormalized.includes('completo')
+			searchStringNormalized.includes('disco') || searchStringNormalized.includes('album')
 		) {
 			// yt normal
 			await page.goto(`https://www.youtube.com/results?search_query=${searchString}`, {
