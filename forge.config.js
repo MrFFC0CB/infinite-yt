@@ -8,6 +8,9 @@ module.exports = {
 	 platform: 'win32',
 	 name: 'Infinite YT',
 	 icon: './public/assets/images/favicon.ico',
+    extraResource: [
+      '.cache/puppeteer',
+    ]
   },
   rebuildConfig: {},
   makers: [

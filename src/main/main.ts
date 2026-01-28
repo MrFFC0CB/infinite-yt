@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { runServer } from './express';
-import { fetchRelateds, fetchSearchResults } from './puppeteer';
 import { app, BrowserWindow, ipcMain, session } from 'electron';
 
 const isProd = app.isPackaged;
@@ -11,6 +10,13 @@ const userDataDir = path.join(process.cwd(), 'data');
 const listsDir = path.join(userDataDir, 'lists');
 const pathToFavs = path.join(listsDir, 'favorites.json');
 const pathToCookieFile = path.join(userDataDir, 'cookies.json');
+
+const cacheDir = isProd
+	? path.join(process.resourcesPath, 'puppeteer')
+	: path.join(process.cwd(), '.cache', 'puppeteer')
+;
+process.env.PUPPETEER_CACHE_DIR = cacheDir;
+import { fetchRelateds, fetchSearchResults } from './puppeteer';
 
 fs.mkdirSync(listsDir, { recursive: true });
 if (!fs.existsSync(pathToFavs)) {

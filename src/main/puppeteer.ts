@@ -1,8 +1,25 @@
-import puppeteer, { Page, Browser } from 'puppeteer';
+import type { Page, Browser, PuppeteerNode } from 'puppeteer';
+
+let _puppeteer: PuppeteerNode | null = null;
+
+async function getPuppeteer() {
+	if (!_puppeteer) {
+		const mod = await import('puppeteer');
+		_puppeteer = mod.default;
+	}
+	return _puppeteer;
+}
 import fs from 'fs';
 import path from 'path';
 
 const pathToCookieFile = path.join(process.cwd(), 'data/cookies.json');
+const puppeteerOptions = {
+	// headless: false,
+	defaultViewport: {
+		width: 1024,
+		height: 768
+	}
+}
 
 const blockPupResources = async (page: Page) => {
 	// Block images, css, fonts and other resources
@@ -50,13 +67,10 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 	if (isPupRunning) return [];
 	isPupRunning = true;
 
-	const browser = await puppeteer.launch({
-		// headless: false,
-		defaultViewport: {
-			width: 1024,
-			height: 768
-		}
-	});
+	const puppeteer = await getPuppeteer();
+	if (!puppeteer) return [];
+
+	const browser = await puppeteer.launch(puppeteerOptions);
 
 	try {
 		const page = await browser.newPage();
@@ -202,13 +216,10 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 
 	const resultsArray: VideoDataType[] = [];
 
-	const browser = await puppeteer.launch({
-		// headless: false,
-		defaultViewport: {
-			width: 1024,
-			height: 1200
-		}
-	});
+	const puppeteer = await getPuppeteer();
+	if (!puppeteer) return [];
+
+	const browser = await puppeteer.launch(puppeteerOptions);
 
 	try {
 		const page = await browser.newPage();
