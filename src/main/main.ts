@@ -72,15 +72,20 @@ const createWindow = () => {
 	const win = new BrowserWindow({
 		width: 1024,
 		height: 768,
-		icon: path.join(__dirname, 'assets/images/favicon.ico'),
+		useContentSize: true,
 		autoHideMenuBar: isProd,
+		icon: path.join(__dirname, 'assets/images/favicon.ico'),
 		webPreferences: {
+			sandbox: false,
 			preload: path.join(__dirname, 'preload.js'),
 		}
 	});
 
 	win.loadURL(`http://localhost:${PORT}`);
 };
+
+app.commandLine.appendSwitch('lang', 'en-US');
+app.commandLine.appendSwitch('force-device-scale-factor', '1');
 
 app.whenReady().then(() => {
 	runServer(PORT);

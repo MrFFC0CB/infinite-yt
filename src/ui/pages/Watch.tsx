@@ -169,7 +169,6 @@ export default function Watch() {
 			width: '1024',
 			height: '768',
 			videoId: videoIdParam,
-			autoplay: 1,
 			events: {
 				'onReady': onPlayerReady,
 				'onStateChange': onPlayerStateChange,
