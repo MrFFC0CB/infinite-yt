@@ -57,29 +57,39 @@ const loadCookies = async (browser: Browser) => {
 	if (cookies) await browser.setCookie(...cookies);
 };
 
-let isPupRunning = false;
-/*
-	Timeout example:
-		await new Promise(resolve => setTimeout(resolve, 2000));
-		const navigationPromise = page.waitForNavigation({waitUntil: "domcontentloaded"});
-*/
-async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
-	if (isPupRunning) return [];
-	isPupRunning = true;
+let browser: Browser | null = null;
+let isLaunching = false;
 
+const getBrowser = async (): Promise<Browser> => {
+	if (browser?.connected) return browser;
+	if (isLaunching) {
+		await new Promise(resolve => setTimeout(resolve, 500));
+		return getBrowser();
+	}
+
+	isLaunching = true;
 	const puppeteer = await getPuppeteer();
-	if (!puppeteer) return [];
+	browser = await puppeteer.launch(puppeteerOptions);
+	await loadCookies(browser);
+	isLaunching = false;
+	return browser;
+};
 
-	const browser = await puppeteer.launch(puppeteerOptions);
+const closeBrowser = async () => {
+	if (browser) {
+		await browser.close();
+		browser = null;
+	}
+};
+
+async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
+	const browserInstance = await getBrowser();
+	const page = await browserInstance.newPage();
 
 	try {
-		const page = await browser.newPage();
-
 		page.setUserAgent({userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'});
 
 		await blockPupResources(page);
-
-		await loadCookies(browser);
 
 		await page.goto(`https://music.youtube.com/watch?v=${currentVideoId}`, {
 			waitUntil: 'networkidle2'
@@ -92,7 +102,7 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 			scrollLeft: 0,
 		});
 
-		await new Promise(resolve => setTimeout(resolve, 500));
+		await new Promise(resolve => setTimeout(resolve, 250));
 
 		const relatedsArray: VideoDataType[] = [];
 
@@ -122,10 +132,10 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 		if (hasRelateds) {
 			await page.click('#player-page #side-panel #tabsContainer #tabsContent .tab-header:last-of-type');
 	
-			await page.waitForSelector('#player-page #items-wrapper a[href*="watch?v="]');
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await page.waitForSelector('#player-page #items.ytmusic-carousel a[href*="watch?v="]');
+			await new Promise(resolve => setTimeout(resolve, 500));
 	
-			const fromRelatedsTab = await page.$$eval('#player-page #items-wrapper a[href*="watch?v="]', links => {
+			const fromRelatedsTab = await page.$$eval('#player-page #items.ytmusic-carousel a[href*="watch?v="]', links => {
 				return links.map(e => {
 					const linkText = e.innerText.trim();
 	
@@ -204,31 +214,20 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 
 		return [];
 	} finally {
-		await browser.close();
-		isPupRunning = false;
+		await page.close();
 	}
 };
 
 
 async function fetchSearchResults(searchString: string, resultsToSkip: number = 0): Promise<VideoDataType[]> {
-	if (isPupRunning) return [];
-	isPupRunning = true;
-
+	const browserInstance = await getBrowser();
+	const page = await browserInstance.newPage();
 	const resultsArray: VideoDataType[] = [];
 
-	const puppeteer = await getPuppeteer();
-	if (!puppeteer) return [];
-
-	const browser = await puppeteer.launch(puppeteerOptions);
-
 	try {
-		const page = await browser.newPage();
-
 		page.setUserAgent({userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'});
 
 		await blockPupResources(page);
-
-		await loadCookies(browser);
 
 		const searchStringNormalized = searchString.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 		if (
@@ -254,7 +253,7 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 				buttonVideos?.click();
 			});
 
-			await new Promise(resolve => setTimeout(resolve, 800));
+			await new Promise(resolve => setTimeout(resolve, 500));
 			page.waitForSelector('#content .ytd-video-renderer');
 
 			const videosResultsArray = await page.$$eval(
@@ -298,7 +297,7 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 		
 		songsTabBtn?.click();
 
-		await new Promise(resolve => setTimeout(resolve, 5000));
+		await new Promise(resolve => setTimeout(resolve, 1000));
 
 		if (resultsToSkip > 0) {
 			await page.locator('html').scroll({
@@ -306,7 +305,7 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 				scrollTop: 3000,
 			});
 
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await new Promise(resolve => setTimeout(resolve, 500));
 		}
 
 		const songsResultsArray = await page.$$eval('#content a[href*="watch?v="]', el => {
@@ -323,7 +322,7 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 		
 		videosTabBtn?.click();
 
-		await new Promise(resolve => setTimeout(resolve, 2000));
+		await new Promise(resolve => setTimeout(resolve, 1000));
 
 		if (resultsToSkip > 0) {
 			await page.locator('html').scroll({
@@ -331,7 +330,7 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 				scrollTop: 3000,
 			});
 
-			await new Promise(resolve => setTimeout(resolve, 1000));
+			await new Promise(resolve => setTimeout(resolve, 500));
 		}
 		
 		const videosResultsArray = await page.$$eval('#content a[href*="watch?v="]', el => {
@@ -359,9 +358,8 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 
 		return [];
 	} finally {
-		await browser.close();
-		isPupRunning = false;
+		await page.close();
 	}
 };
 
-export { fetchRelateds, fetchSearchResults };
+export { fetchRelateds, fetchSearchResults, closeBrowser };

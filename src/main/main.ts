@@ -16,7 +16,7 @@ const cacheDir = isProd
 	: path.join(process.cwd(), '.cache', 'puppeteer')
 ;
 process.env.PUPPETEER_CACHE_DIR = cacheDir;
-import { fetchRelateds, fetchSearchResults } from './puppeteer';
+import { fetchRelateds, fetchSearchResults, closeBrowser } from './puppeteer';
 
 fs.mkdirSync(listsDir, { recursive: true });
 if (!fs.existsSync(pathToFavs)) {
@@ -109,4 +109,5 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
 	exportYoutubeCookies();
+	closeBrowser();
 });
