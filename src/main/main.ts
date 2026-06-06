@@ -87,8 +87,8 @@ const createWindow = () => {
 app.commandLine.appendSwitch('lang', 'en-US');
 app.commandLine.appendSwitch('force-device-scale-factor', '1');
 
-app.whenReady().then(() => {
-	runServer(PORT);
+app.whenReady().then(async () => {
+	await runServer(PORT);
 	createWindow();
 
 	app.on('activate', () => {
