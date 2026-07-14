@@ -237,6 +237,9 @@ export default function Watch() {
 
 	return (
 		<>
+			<div id="wrapper-player" ref={wrapperPlayerRef}>
+				<div id="player"></div>
+			</div>
 			{playlist && 
 				<div id="wrapper-playlist">
 					{playlist.items.length > 1 && <div id="playlist-controls">
@@ -268,9 +271,6 @@ export default function Watch() {
 					</div>
 				</div>
 			}
-			<div id="wrapper-player" ref={wrapperPlayerRef}>
-				<div id="player"></div>
-			</div>
 		</>
 	);
 };
