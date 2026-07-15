@@ -6,7 +6,9 @@
 
 :root {
 	--side-padding: 1.5rem;
-	--main-text-color: rgb(180, 202, 236);
+	--main-color: #45659f;
+	--accent-color: #9dacc8;
+	--main-text-color: #d1d7e0;
 }
 
 body {

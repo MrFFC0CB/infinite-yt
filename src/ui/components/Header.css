@@ -4,7 +4,7 @@ header {
 	top: 0;
 	left: 0;
 	z-index: 10;
-	background-color: rgb(69, 101, 159);
+	background-color: var(--main-color);
 }
 header .container {
 	display: flex;
