@@ -42,11 +42,11 @@ export default function Home() {
 			{favorites.length > 0 &&
 				<div id="favorites-options">
 					<Link to={`/watch/favorites/${favorites[0].videoId}`}>
-						Watch <IconHeart fill="#bf0101" /> videos
+						Watch <IconHeart fill="#45A053" /> videos
 					</Link>
 
 					<Link to={`/favorites`}>
-						List <IconHeart fill="#bf0101" /> videos
+						List <IconHeart fill="#45A053" /> videos
 					</Link>
 				</div>
 			}
