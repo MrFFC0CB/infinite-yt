@@ -9,6 +9,12 @@ export default function SearchResults() {
 	const { setTitle } = useOutletContext<LayoutContext>();
 
 	useEffect(() => {
+		return () => {
+			window.api.closePages();
+		}
+	}, []);
+
+	useEffect(() => {
 		if (!keyword) return;
 
 		window.api.fetchSearchResults(keyword)

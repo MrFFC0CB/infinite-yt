@@ -16,7 +16,7 @@ const cacheDir = isProd
 	: path.join(process.cwd(), '.cache', 'puppeteer')
 ;
 process.env.PUPPETEER_CACHE_DIR = cacheDir;
-import { fetchRelateds, fetchSearchResults, closeBrowser } from './puppeteer';
+import { fetchRelateds, fetchSearchResults, initBrowser, closeBrowser, closePages } from './puppeteer';
 
 fs.mkdirSync(listsDir, { recursive: true });
 if (!fs.existsSync(pathToFavs)) {
@@ -98,9 +98,13 @@ app.whenReady().then(async () => {
 	ipcMain.handle('favorites:get', getFavorites);
 	ipcMain.handle('favorites:add', addFavorite);
 	ipcMain.handle('favorites:remove', removeFavorite);
-
+	
 	ipcMain.handle('relateds:get', (_e, videoId: string) => fetchRelateds(videoId));
 	ipcMain.handle('search:get', (_e, keyword: string) => fetchSearchResults(keyword));
+
+	ipcMain.handle('closePages', closePages);
+
+	initBrowser();
 });
 
 app.on('window-all-closed', () => {

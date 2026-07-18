@@ -187,6 +187,8 @@ export default function Watch() {
 			if (isPlayerReadyRef.current) {
 				isPlayerReadyRef.current = false;
 			}
+
+			window.api.closePages();
 		};
 	}, []);
 

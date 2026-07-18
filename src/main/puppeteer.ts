@@ -60,6 +60,20 @@ const loadCookies = async (browser: Browser) => {
 let browser: Browser | null = null;
 let isLaunching = false;
 
+function assertBrowser(browser: Browser | null): asserts browser is Browser {
+	if (!browser) {
+		throw new Error('Browser not initialized');
+	}
+}
+
+const initBrowser = async (): Promise<void> => {
+	if (browser) return;
+
+	const puppeteer = await getPuppeteer();
+	browser = await puppeteer.launch(puppeteerOptions);
+	await loadCookies(browser);
+};
+
 const getBrowser = async (): Promise<Browser> => {
 	if (browser?.connected) return browser;
 	if (isLaunching) {
@@ -68,23 +82,45 @@ const getBrowser = async (): Promise<Browser> => {
 	}
 
 	isLaunching = true;
-	const puppeteer = await getPuppeteer();
-	browser = await puppeteer.launch(puppeteerOptions);
-	await loadCookies(browser);
-	isLaunching = false;
-	return browser;
+
+	try {
+		await initBrowser();
+		assertBrowser(browser);
+
+		return browser;
+	} finally {
+		isLaunching = false;
+	}
 };
 
-const closeBrowser = async () => {
+const closeBrowser = async (): Promise<void> => {
 	if (browser) {
 		await browser.close();
 		browser = null;
 	}
 };
 
+const closePages = async (): Promise<void> => {
+	assertBrowser(browser);
+
+	const currentPages = await browser.pages();
+
+	await Promise.all(
+		currentPages
+			.filter(page => page.url() !== 'about:blank')
+			.map(page => page.close())
+	);
+};
+
+const createPage = async (): Promise<Page> => {
+	await closePages();
+	assertBrowser(browser);
+
+	return await browser.newPage();
+}
+
 async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
-	const browserInstance = await getBrowser();
-	const page = await browserInstance.newPage();
+	const page = await createPage();
 
 	try {
 		page.setUserAgent({userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'});
@@ -220,8 +256,7 @@ async function fetchRelateds(currentVideoId: string): Promise<VideoDataType[]> {
 
 
 async function fetchSearchResults(searchString: string, resultsToSkip: number = 0): Promise<VideoDataType[]> {
-	const browserInstance = await getBrowser();
-	const page = await browserInstance.newPage();
+	const page = await createPage();
 	const resultsArray: VideoDataType[] = [];
 
 	try {
@@ -362,4 +397,4 @@ async function fetchSearchResults(searchString: string, resultsToSkip: number = 
 	}
 };
 
-export { fetchRelateds, fetchSearchResults, closeBrowser };
+export { fetchRelateds, fetchSearchResults, initBrowser, closeBrowser, closePages };

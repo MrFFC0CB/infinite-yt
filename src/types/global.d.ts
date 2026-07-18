@@ -10,6 +10,7 @@ declare global {
 			removeFavorite: (videoId: string) => Promise<VideoDataType[]>;
 			fetchSearchResults: (searchString: string) => Promise<VideoDataType[]>;
 			fetchRelateds: (videoId: string) => Promise<VideoDataType[]>;
+			closePages: () => Promise<void>;
 		};
 	};
 
