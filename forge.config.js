@@ -6,7 +6,8 @@ module.exports = {
     asar: true,
 	 overwrite: true,
 	 platform: 'win32',
-	 name: 'Infinite YT',
+	 name: 'infinite-yt',
+	 productName: 'Infinite YT',
 	 icon: './public/assets/images/favicon.ico',
     extraResource: [
       '.cache/puppeteer',
