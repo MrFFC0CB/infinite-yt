@@ -12,7 +12,7 @@
     "package": "npm run clean-out-dir && npm run build && electron-forge package"
   },
   "author": "MrFFC0CB",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^7.10.2",
     "@electron-forge/maker-deb": "^7.10.2",
